@@ -106,9 +106,18 @@ class UserController extends Controller
             return back()->with('error', 'Không được phép xóa tài khoản Quản trị viên hệ thống!');
         }
 
+        // Kiểm tra xem có đang mượn thiết bị nào không (status = 1 trong bảng trung gian)
+        $isBorrowing = $user->equipments()->wherePivot('status', 1)->exists();
+
+        if ($isBorrowing) {
+            return back()->with('error', 'Không thể xóa nhân viên này vì đang có thiết bị mượn chưa hoàn trả!');
+        }
+
+        // Thực hiện xoá mềm: set available = 0 và delete()
+        $user->update(['available' => 0]);
         $user->delete();
 
         return redirect()->route('users.index')
-            ->with('success', 'Nhân viên đã được xóa thành công!');
+            ->with('success', 'Nhân viên đã được đưa vào thùng rác thành công!');
     }
 }

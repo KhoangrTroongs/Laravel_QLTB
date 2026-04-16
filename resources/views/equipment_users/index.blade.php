@@ -60,32 +60,16 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th width="80" class="text-center">
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'id', 'direction' => request('sort') == 'id' && request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                            # {!! request('sort') == 'id' ? (request('direction') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>') : '<i class="fas fa-sort opacity-25"></i>' !!}
-                        </a>
+                    <x-sortable-header field="id" title="#" width="80" class="text-center" />
+                    <x-sortable-header field="name" title="Nhân Viên" />
+                    <x-sortable-header field="equipment" title="Thiết Bị" />
+                    <x-sortable-header field="date" title="Thời Gian" />
+                    <x-sortable-header field="status" title="Trạng Thái" />
+                    <th width="120" class="text-center py-3">
+                        <span class="text-muted font-weight-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                            Thao Tác
+                        </span>
                     </th>
-                    <th>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'name', 'direction' => request('sort') == 'name' && request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                            Nhân Viên {!! request('sort') == 'name' ? (request('direction') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>') : '<i class="fas fa-sort opacity-25"></i>' !!}
-                        </a>
-                    </th>
-                    <th>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'equipment', 'direction' => request('sort') == 'equipment' && request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                            Thiết Bị {!! request('sort') == 'equipment' ? (request('direction') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>') : '<i class="fas fa-sort opacity-25"></i>' !!}
-                        </a>
-                    </th>
-                    <th>
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'date', 'direction' => request('sort') == 'date' && request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                            Thời Gian {!! request('sort') == 'date' ? (request('direction') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>') : '<i class="fas fa-sort opacity-25"></i>' !!}
-                        </a>
-                    </th>
-                    <th width="150">
-                        <a href="{{ request()->fullUrlWithQuery(['sort' => 'status', 'direction' => request('sort') == 'status' && request('direction') == 'asc' ? 'desc' : 'asc']) }}">
-                            Trạng Thái {!! request('sort') == 'status' ? (request('direction') == 'asc' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>') : '<i class="fas fa-sort opacity-25"></i>' !!}
-                        </a>
-                    </th>
-                    <th width="120" class="text-center text-muted">Thao Tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -94,17 +78,33 @@
                     <td class="text-center text-muted font-weight-bold">{{ $record->id }}</td>
                     <td>
                         <div class="d-flex align-items-center">
-                            <img src="{{ $record->user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($record->user->name ?? 'U') }}" 
-                                 class="rounded-circle mr-2 border" 
-                                 style="width: 35px; height: 35px; object-fit: cover;">
+                            @if($record->user && $record->user->avatar)
+                                <img src="{{ str_starts_with($record->user->avatar, 'http') ? $record->user->avatar : asset('storage/' . $record->user->avatar) }}" 
+                                     class="rounded-circle mr-2 border" 
+                                     style="width: 35px; height: 35px; object-fit: cover;">
+                            @else
+                                <img src="https://ui-avatars.com/api/?name={{ urlencode($record->user->name ?? 'N/A') }}&background=random" 
+                                     class="rounded-circle mr-2 border" 
+                                     style="width: 35px; height: 35px; object-fit: cover;">
+                            @endif
                             <div>
-                                <div class="font-weight-bold text-dark">{{ $record->user->name ?? 'N/A' }}</div>
+                                <div class="font-weight-bold text-dark">
+                                    {{ $record->user->name ?? 'N/A' }}
+                                    @if($record->user && $record->user->trashed())
+                                        <span class="badge badge-secondary p-1 ml-1" style="font-size: 0.6rem;">Đã nghỉ</span>
+                                    @endif
+                                </div>
                                 <small class="text-muted">{{ $record->user->employee_id ?? '' }}</small>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <div class="font-weight-bold text-primary">{{ $record->equipment->name ?? 'N/A' }}</div>
+                        <div class="font-weight-bold text-primary">
+                            {{ $record->equipment->name ?? 'N/A' }}
+                            @if($record->equipment && $record->equipment->trashed())
+                                <span class="badge badge-secondary p-1 ml-1" style="font-size: 0.6rem;">Đã hủy</span>
+                            @endif
+                        </div>
                         <small class="text-muted">{{ $record->equipment->model ?? '' }}</small>
                     </td>
                     <td>
@@ -127,10 +127,9 @@
                             <a href="{{ route('equipment-users.edit', $record) }}" class="btn btn-warning btn-xs shadow-sm me-1" title="Cập nhật">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('equipment-users.destroy', $record) }}" method="POST" class="d-inline"
-                                  onsubmit="return confirm('Xác nhận xóa phiếu mượn này?')">
+                            <form action="{{ route('equipment-users.destroy', $record) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-xs shadow-sm" title="Xóa">
+                                <button type="button" class="btn btn-danger btn-xs shadow-sm confirm-delete" title="Xóa">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

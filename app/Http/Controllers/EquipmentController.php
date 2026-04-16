@@ -84,9 +84,18 @@ class EquipmentController extends Controller
 
     public function destroy(Equipment $equipment)
     {
+        // Kiểm tra xem thiết bị có đang được mượn không
+        $isBorrowed = $equipment->users()->wherePivot('status', 1)->exists();
+
+        if ($isBorrowed) {
+            return back()->with('error', 'Không thể xóa thiết bị này vì đang có nhân viên mượn và chưa trả!');
+        }
+
+        // Thực hiện xoá mềm
+        $equipment->update(['available' => 0]);
         $equipment->delete();
 
         return redirect()->route('equipment.index')
-            ->with('success', 'Thiết bị đã được xóa thành công!');
+            ->with('success', 'Thiết bị đã được đưa vào thùng rác thành công!');
     }
 }

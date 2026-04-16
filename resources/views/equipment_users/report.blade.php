@@ -32,8 +32,13 @@
             <div class="user-report-card mb-5 bg-white border rounded-lg shadow-sm overflow-hidden">
                 <div class="card-user-header p-3 bg-light border-bottom d-flex align-items-center">
                     <div class="avatar-wrapper mr-3">
-                        <img src="{{ $data['user']->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($data['user']->name) }}" 
-                             class="rounded-circle border-white shadow-sm" style="width: 50px; height: 50px; border-width: 3px !important; object-fit: cover;">
+                        @if($data['user']->avatar)
+                            <img src="{{ str_starts_with($data['user']->avatar, 'http') ? $data['user']->avatar : asset('storage/' . $data['user']->avatar) }}" 
+                                 class="rounded-circle border-white shadow-sm" style="width: 50px; height: 50px; border-width: 3px !important; object-fit: cover;">
+                        @else
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode($data['user']->name) }}&background=random" 
+                                 class="rounded-circle border-white shadow-sm" style="width: 50px; height: 50px; border-width: 3px !important; object-fit: cover;">
+                        @endif
                     </div>
                     <div>
                         <h5 class="mb-0 font-weight-bold text-dark">{{ $data['user']->name }}</h5>

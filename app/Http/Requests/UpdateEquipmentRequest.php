@@ -25,7 +25,7 @@ class UpdateEquipmentRequest extends FormRequest
         return [
             'name'        => 'required|string|max:255',
             'model'       => 'required|string|max:255',
-            'image'       => 'nullable|image|max:2048',
+            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string|max:1000',
             'status'      => 'required|boolean',
         ];

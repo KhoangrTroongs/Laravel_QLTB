@@ -21,7 +21,7 @@
         <!-- Search & Filter -->
         <form method="GET" action="{{ route('equipment.index') }}" class="mb-4">
             <div class="row align-items-center">
-                <div class="col-md-5">
+                <div class="col-md-7">
                     <div class="input-group shadow-sm">
                         <input type="text" name="search" class="form-control" placeholder="Tìm kiếm tên, model..." value="{{ request('search') }}">
                         <div class="input-group-append">
@@ -29,15 +29,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <select name="status" class="form-control shadow-sm" onchange="this.form.submit()">
                         <option value="">-- Tất cả trạng thái --</option>
                         <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Hoạt động bình thường</option>
                         <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Bị hư</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <a href="{{ route('equipment.index') }}" class="btn btn-default shadow-sm border btn-block" title="Reset bộ lọc">
+                <div class="col-md-1">
+                    <a href="{{ route('equipment.index') }}" class="btn btn-default shadow-sm border btn-block btn-input" title="Reset bộ lọc">
                         <i class="fas fa-undo"></i>
                     </a>
                 </div>
@@ -47,12 +47,20 @@
         <table class="table table-hover">
             <thead>
                 <tr>
-                    <th width="60" class="text-center">#</th>
-                    <th>Thiết Bị</th>
-                    <th>Model & Phân Loại</th>
-                    <th>Mô Tả</th>
-                    <th width="180">Tình Trạng</th>
-                    <th width="120" class="text-center">Thao Tác</th>
+                    <x-sortable-header field="id" title="#" width="80" class="text-center" />
+                    <x-sortable-header field="name" title="Thiết Bị" />
+                    <x-sortable-header field="model" title="Model & Phân Loại" />
+                    <th class="py-3">
+                        <span class="text-muted font-weight-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                            Mô Tả
+                        </span>
+                    </th>
+                    <x-sortable-header field="status" title="Tình Trạng" width="180" />
+                    <th width="120" class="text-center py-3">
+                        <span class="text-muted font-weight-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                            Thao Tác
+                        </span>
+                    </th>
                 </tr>
             </thead>
             <tbody>
@@ -93,9 +101,9 @@
                             <a href="{{ route('equipment.edit', $item) }}" class="btn btn-warning btn-xs shadow-sm me-1" title="Sửa">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('equipment.destroy', $item) }}" method="POST" class="d-inline" onsubmit="return confirm('Xác nhận xóa thiết bị này?')">
+                            <form action="{{ route('equipment.destroy', $item) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
-                                <button class="btn btn-danger btn-xs shadow-sm" title="Xóa">
+                                <button type="button" class="btn btn-danger btn-xs shadow-sm confirm-delete" title="Xóa">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

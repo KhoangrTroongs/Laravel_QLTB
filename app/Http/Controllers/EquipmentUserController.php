@@ -13,7 +13,10 @@ class EquipmentUserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = EquipmentUser::with(['user', 'equipment']);
+        $query = EquipmentUser::with([
+            'user' => fn($q) => $q->withTrashed(),
+            'equipment' => fn($q) => $q->withTrashed()
+        ]);
 
         // Filter by status
         if ($request->filled('status') && $request->status !== '') {
@@ -23,8 +26,8 @@ class EquipmentUserController extends Controller
         // Search by user name or equipment name
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->whereHas('user', fn ($u) => $u->where('name', 'like', '%' . $request->search . '%'))
-                  ->orWhereHas('equipment', fn ($e) => $e->where('name', 'like', '%' . $request->search . '%'));
+                $q->whereHas('user', fn ($u) => $u->withTrashed()->where('name', 'like', '%' . $request->search . '%'))
+                  ->orWhereHas('equipment', fn ($e) => $e->withTrashed()->where('name', 'like', '%' . $request->search . '%'));
             });
         }
 
@@ -38,8 +41,8 @@ class EquipmentUserController extends Controller
 
         // Join để hỗ trợ sắp xếp theo tên NV và thiết bị
         $query->select('equipment_users.*')
-            ->join('users', 'equipment_users.user_id', '=', 'users.id')
-            ->join('equipment', 'equipment_users.equipment_id', '=', 'equipment.id');
+            ->leftJoin('users', 'equipment_users.user_id', '=', 'users.id')
+            ->leftJoin('equipment', 'equipment_users.equipment_id', '=', 'equipment.id');
 
         // Sort logic
         $sortField = $request->get('sort', 'id');
@@ -64,10 +67,11 @@ class EquipmentUserController extends Controller
 
     public function create()
     {
-        $users     = User::where('status', 1)->orderBy('name')->get();
+        $users     = User::where('status', 1)->where('available', 1)->orderBy('name')->get();
         
-        // Chỉ lấy thiết bị đang hoạt động VÀ không có ai đang mượn (status = 1 trong bảng equipment_users)
+        // Chỉ lấy thiết bị đang hoạt động VÀ không có ai đang mượn (status = 1 trong bảng equipment_users) VÀ available = 1
         $equipment = Equipment::where('status', 1)
+            ->where('available', 1)
             ->whereDoesntHave('users', function ($q) {
                 $q->where('equipment_users.status', 1);
             })->orderBy('name')->get();
@@ -85,17 +89,21 @@ class EquipmentUserController extends Controller
 
     public function show(EquipmentUser $equipmentUser)
     {
-        $equipmentUser->load(['user', 'equipment']);
+        $equipmentUser->load([
+            'user' => fn($q) => $q->withTrashed(), 
+            'equipment' => fn($q) => $q->withTrashed()
+        ]);
 
         return view('equipment_users.show', compact('equipmentUser'));
     }
 
     public function edit(EquipmentUser $equipmentUser)
     {
-        $users     = User::where('status', 1)->orderBy('name')->get();
+        $users     = User::where('status', 1)->where('available', 1)->orderBy('name')->get();
         
         // Lấy thiết bị rảnh HOẶC chính là thiết bị của phiếu đang sửa này
         $equipment = Equipment::where('status', 1)
+            ->where('available', 1)
             ->where(function ($query) use ($equipmentUser) {
                 $query->whereDoesntHave('users', function ($q) {
                     $q->where('equipment_users.status', 1);
@@ -116,6 +124,11 @@ class EquipmentUserController extends Controller
 
     public function destroy(EquipmentUser $equipmentUser)
     {
+        // Kiểm tra nếu phiếu mượn chưa trả thiết bị (status = 1)
+        if ($equipmentUser->status == 1) {
+            return back()->with('error', 'Không thể xóa phiếu mượn này vì thiết bị chưa được hoàn trả!');
+        }
+
         $equipmentUser->delete();
 
         return redirect()->route('equipment-users.index')
@@ -128,13 +141,13 @@ class EquipmentUserController extends Controller
     public function report(Request $request)
     {
         $year  = $request->get('year', now()->year);
-        $users = User::withCount(['equipments' => function ($q) use ($year) {
+        $users = User::withTrashed()->withCount(['equipments' => function ($q) use ($year) {
             $q->whereYear('equipment_users.ngaymuon', $year);
         }])->having('equipments_count', '>', 0)->get();
 
         $reportData = [];
         foreach ($users as $user) {
-            $borrowed = EquipmentUser::with('equipment')
+            $borrowed = EquipmentUser::with(['equipment' => fn($q) => $q->withTrashed()])
                 ->where('user_id', $user->id)
                 ->whereYear('ngaymuon', $year)
                 ->get()

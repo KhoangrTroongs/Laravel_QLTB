@@ -25,16 +25,16 @@
                     <div class="col-md-6 border-right">
                         <h6><strong><i class="fas fa-user mr-2"></i>Nhân Viên</strong></h6>
                         <div class="p-2 bg-light rounded">
-                            <p class="mb-1"><strong>Tên:</strong> {{ $equipmentUser->user->name }}</p>
-                            <p class="mb-1"><strong>Mã NV:</strong> {{ $equipmentUser->user->employee_id }}</p>
-                            <p class="mb-0"><strong>Email:</strong> {{ $equipmentUser->user->email }}</p>
+                            <p class="mb-1"><strong>Tên:</strong> {{ $equipmentUser->user->name ?? 'N/A' }} @if($equipmentUser->user?->trashed()) <small class="text-danger">(Đã nghỉ)</small> @endif</p>
+                            <p class="mb-1"><strong>Mã NV:</strong> {{ $equipmentUser->user->employee_id ?? '-' }}</p>
+                            <p class="mb-0"><strong>Email:</strong> {{ $equipmentUser->user->email ?? '-' }}</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <h6><strong><i class="fas fa-laptop mr-2"></i>Thiết Bị</strong></h6>
                         <div class="p-2 bg-light rounded">
-                            <p class="mb-1"><strong>Tên:</strong> {{ $equipmentUser->equipment->name }}</p>
-                            <p class="mb-1"><strong>Model:</strong> {{ $equipmentUser->equipment->model }}</p>
+                            <p class="mb-1"><strong>Tên:</strong> {{ $equipmentUser->equipment->name ?? 'N/A' }} @if($equipmentUser->equipment?->trashed()) <small class="text-danger">(Đã xoá)</small> @endif</p>
+                            <p class="mb-1"><strong>Model:</strong> {{ $equipmentUser->equipment->model ?? '-' }}</p>
                             <p class="mb-0"><strong>Mô tả TB:</strong> {{ $equipmentUser->equipment->description ?? 'Không có' }}</p>
                         </div>
                     </div>

@@ -31,7 +31,7 @@ class UpdateUserRequest extends FormRequest
             'address'     => 'nullable|string|max:500',
             'status'      => 'required|boolean',
             'password'    => 'nullable|string|min:6',
-            'avatar'      => 'nullable|image|max:2048',
+            'avatar'      => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
     }
 

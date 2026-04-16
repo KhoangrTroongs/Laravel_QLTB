@@ -147,13 +147,13 @@
                         <i class="fas fa-arrow-left mr-1"></i>Quay Lại
                     </a>
                     @if($user->employee_id !== 'ADMIN001')
-                        <button type="button" class="btn btn-danger float-right shadow-sm" onclick="if(confirm('Bạn có chắc muốn xóa nhân viên này?')) document.getElementById('delete-form').submit();">
+                        <button type="button" class="btn btn-danger float-right shadow-sm" onclick="$('#delete-form').submit()">
                             <i class="fas fa-trash mr-1"></i>Xóa Nhân Viên
                         </button>
                     @endif
                 </div>
             </form>
-            <form id="delete-form" action="{{ route('users.destroy', $user) }}" method="POST" style="display: none;">
+            <form id="delete-form" action="{{ route('users.destroy', $user) }}" method="POST" style="display: none;" class="delete-form">
                 @csrf @method('DELETE')
             </form>
         </div>

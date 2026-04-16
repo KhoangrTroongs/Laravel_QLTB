@@ -13,55 +13,144 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
     <!-- Google Fonts: Be Vietnam Pro -->
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #f4f6f9; color: #2d3436; }
-        .main-sidebar { box-shadow: 4px 0 15px rgba(0,0,0,0.05); }
-        .brand-link { border-bottom: 1px solid rgba(255,255,255,0.05) !important; padding: 1.2rem 1.5rem !important; }
-        .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active { background-color: #4a90e2 !important; box-shadow: 0 4px 12px rgba(74,144,226,0.3) !important; }
-        .nav-sidebar .nav-item { margin-bottom: 4px; }
-        .nav-sidebar .nav-link { border-radius: 10px !important; margin: 0 10px; padding: 10px 15px !important; transition: all 0.3s; }
-        .nav-sidebar .nav-link:hover:not(.active) { background-color: rgba(255,255,255,0.05); transform: translateX(5px); }
+        body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #f1f5f9; color: #1e293b; overflow-x: hidden; }
+        
+        /* Premium Background & Sidebar */
+        .main-sidebar { background: #1e293b !important; box-shadow: 10px 0 30px rgba(0,0,0,0.05); }
+        .brand-link { border-bottom: 1px solid rgba(255,255,255,0.05) !important; padding: 1.5rem !important; background: #0f172a !important; }
+        .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active { 
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important; 
+            box-shadow: 0 10px 20px rgba(37,99,235,0.3) !important; 
+            color: #fff !important;
+            font-weight: 600;
+        }
+        .sidebar-dark-primary .nav-sidebar>.nav-item>.nav-link.active i {
+            color: #fff !important;
+        }
+        .nav-sidebar .nav-item { margin-bottom: 8px; }
+        .nav-sidebar .nav-link { border-radius: 0 !important; margin: 0; padding: 12px 20px !important; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); color: #94a3b8 !important; }
+        .nav-sidebar .nav-link:hover:not(.active) { background-color: rgba(255,255,255,0.05) !important; color: #fff !important; transform: translateX(5px); }
+        .nav-sidebar .nav-icon { font-size: 1.1rem; margin-right: 12px !important; }
 
+        /* Modern Content Wrapper */
         .content-wrapper { background-color: #f8fafc; }
-        .card { border-radius: 16px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.03) !important; overflow: hidden; margin-bottom: 2rem; }
-        .card-primary.card-outline { border-top: 4px solid #4a90e2; }
-        .card-success.card-outline { border-top: 4px solid #2ecc71; }
-        .card-warning.card-outline { border-top: 4px solid #f1c40f; }
-        .card-danger.card-outline { border-top: 4px solid #e74c3c; }
-        .card-header { background-color: #fff; border-bottom: 1px solid #f1f5f9; padding: 1.25rem 1.5rem; }
-        .card-title { font-weight: 700; color: #1e293b; letter-spacing: -0.5px; }
-
-        .table { margin-bottom: 0; }
-        .table thead th { background-color: #f8fafc; color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; padding: 1rem 1.5rem; border: none; }
-        .table tbody td { padding: 1rem 1.5rem; vertical-align: middle; color: #334155; border-top: 1px solid #f1f5f9; }
-        .table-hover tbody tr:hover { background-color: #f1f5f9; }
-
-        .badge { padding: 0.5rem 0.75rem; border-radius: 8px; font-weight: 600; font-size: 0.75rem; }
-        .btn { border-radius: 10px; font-weight: 600; padding: 0.6rem 1.2rem; transition: all 0.3s; }
-        .btn-xs { padding: 0.25rem 0.5rem; border-radius: 6px; }
-        .btn-success { background: #2ecc71; border-color: #2ecc71; }
-        .btn-success:hover { background: #27ae60; border-color: #27ae60; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46,204,113,0.3); }
-
-        .small-box { border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .small-box .inner { padding: 1.5rem; }
-        .small-box h3 { font-weight: 800; }
-
-        /* Custom Input & Alignments */
-        .form-control, .form-control-sm { border-radius: 10px; border: 1px solid #e2e8f0; padding: 0.6rem 1rem; transition: all 0.2s; height: auto; }
-        .form-control:focus { border-color: #4a90e2; box-shadow: 0 0 0 3px rgba(74,144,226,0.1); }
-        .input-group > .form-control { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
-        .input-group > .input-group-append > .btn { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; height: 100%; }
+        .card { border-radius: 20px; border: none; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03) !important; transition: transform 0.3s, box-shadow 0.3s; margin-bottom: 2rem; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05) !important; }
         
-        label { font-weight: 600; color: #475569; font-size: 0.85rem; margin-bottom: 0.5rem; }
-        .input-group-text { border-radius: 10px; background-color: #f8fafc; border: 1px solid #e2e8f0; }
+        .card-header { background-color: #fff; border-bottom: 1px solid #f1f5f9; padding: 1.5rem 2rem; border-radius: 20px 20px 0 0 !important; }
+        .card-title { font-weight: 800; color: #0f172a; letter-spacing: -0.025em; font-size: 1.1rem; }
+        .card-body { padding: 2rem; }
         
-        /* Fix icon alignment in headers */
-        .card-header .card-title i { margin-right: 10px; color: #4a90e2; vertical-align: middle; }
-        .card-header .card-title { display: flex; align-items: center; }
+        /* Fix for transparent card headers in colored cards */
+        .card[class*="bg-"] .card-header { background: transparent !important; border-bottom: none; }
+        .card[class*="bg-"] .card-title { color: #fff !important; }
+        
+        /* Enhanced Tables */
+        .table thead th { background-color: #f8fafc; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; padding: 1.25rem 1.5rem; border-bottom: 2px solid #f1f5f9; }
+        .table tbody td { padding: 1.25rem 1.5rem; vertical-align: middle; color: #334155; border-top: 1px solid #f1f5f9; font-size: 0.95rem; }
+        
+        /* Buttons & Badges */
+        .btn { border-radius: 12px; font-weight: 600; padding: 0.75rem 1.5rem; transition: all 0.2s; letter-spacing: 0.025em; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .btn-primary { background: #2563eb; border: none; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.3); }
+        
+        .btn-input { height: calc(1.5em + 1.5rem + 2px); display: flex !important; align-items: center; justify-content: center; padding-top: 0 !important; padding-bottom: 0 !important; }
 
-        /* Sidebar Mini Fixes */
-        .sidebar-collapse .brand-link i { margin-left: 0.8rem !important; margin-right: 0 !important; float: none !important; }
-        .sidebar-collapse .brand-text { display: none; }
+        .badge { padding: 0.5rem 0.85rem; border-radius: 10px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.025em; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Forms & Inputs */
+        .form-control { 
+            border-radius: 12px; 
+            border: 1px solid #e2e8f0; 
+            padding: 0.75rem 1.25rem; 
+            height: calc(1.5em + 1.5rem + 2px); 
+            transition: all 0.2s; 
+            font-size: 0.95rem;
+        }
+        .form-control:focus { 
+            border-color: #3b82f6; 
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); 
+        }
+
+        /* Fix Input Group */
+        .input-group { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+        .input-group > .form-control { border: none !important; border-radius: 0 !important; height: auto !important; }
+        .input-group > .input-group-append > .btn { 
+            border-radius: 0 !important; 
+            margin: 0 !important; 
+            height: 100% !important; 
+            display: flex !important;
+            align-items: center !important;
+            padding: 0 1.5rem !important;
+        }
+        .input-group:focus-within { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Small Box Overrides */
+        .small-box { border-radius: 24px; border: none; overflow: hidden; }
+        .small-box .inner { padding: 2rem; }
+        .small-box h3 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .small-box p { font-weight: 600; font-size: 1rem; opacity: 0.9; }
+        .small-box .icon { top: 15px; right: 20px; }
+        .small-box .icon > i { font-size: 70px; }
+
+        /* Fix for sidebar collapse icons */
+        .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link {
+            margin: 0 !important;
+            padding: 12px 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+            border-radius: 0 !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-link p {
+            display: none !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .nav-sidebar .nav-icon {
+            margin: 0 !important;
+            font-size: 1.25rem;
+        }
+        
+        /* Brand centering when collapsed */
+        .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .brand-link {
+            padding: 1.5rem 0 !important;
+            display: flex !important;
+            justify-content: center !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .brand-link i {
+            margin: 0 !important;
+            float: none !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:not(:hover) .brand-text {
+            display: none !important;
+        }
+
+        /* Hover expansion fixes */
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover {
+            width: 250px !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-link {
+            display: flex !important;
+            justify-content: flex-start !important;
+            padding: 12px 20px !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+        }
+        .sidebar-mini.sidebar-collapse .main-sidebar:hover .nav-icon {
+            margin-right: 12px !important;
+        }
     </style>
     @stack('styles')
 </head>
@@ -83,6 +172,53 @@
                     <i class="far fa-clock mr-1"></i>{{ now()->format('d/m/Y') }}
                 </span>
             </li>
+            @auth
+            <li class="nav-item">
+                <a href="{{ route('home') }}" class="nav-link" title="Trang chủ">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link d-flex align-items-center" href="#" id="navbarDropdown"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    @if(Auth::user()->avatar)
+                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
+                             class="rounded-circle mr-2 border"
+                             style="width: 32px; height: 32px; object-fit: cover;">
+                    @else
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff"
+                             class="rounded-circle mr-2"
+                             style="width: 32px; height: 32px;">
+                    @endif
+                    <span class="text-dark font-weight-bold" style="font-size: 0.9rem;">{{ Auth::user()->name }}</span>
+                    <i class="fas fa-chevron-down ml-2 text-muted" style="font-size: 0.7rem;"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right shadow-sm" style="border-radius: 12px; border: none; min-width: 200px;">
+                    <div class="dropdown-item-text py-2 px-3">
+                        <small class="text-muted">Đăng nhập với vai trò</small>
+                        <div>
+                            @foreach(Auth::user()->roles as $role)
+                                <span class="badge {{ $role->name === 'admin' ? 'badge-danger' : ($role->name === 'editor' ? 'badge-primary' : 'badge-secondary') }}"
+                                      style="font-size: 0.7rem; border-radius: 6px;">
+                                    {{ $role->display_name }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{{ route('profile.show') }}">
+                        <i class="fas fa-user-circle mr-2 text-primary"></i> Hồ Sơ Cá Nhân
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="fas fa-sign-out-alt mr-2"></i> Đăng Xuất
+                        </button>
+                    </form>
+                </div>
+            </li>
+            @endauth
         </ul>
     </nav>
 
@@ -108,17 +244,33 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>Quản Lý Nhân Viên</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="{{ route('equipment-users.index') }}" class="nav-link {{ request()->routeIs('equipment-users.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-handshake"></i>
                             <p>Mượn Thiết Bị</p>
                         </a>
                     </li>
+                    @auth
+                    @if(Auth::user()->isAdmin())
+                    <li class="nav-item">
+                        <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-users-cog"></i>
+                            <p>Quản Lý Nhân Viên</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('roles.index') }}" class="nav-link {{ request()->routeIs('roles.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-shield-alt"></i>
+                            <p>Phân Quyền</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('trash.index') }}" class="nav-link {{ request()->routeIs('trash.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-trash-alt text-danger"></i>
+                            <p>Thùng rác</p>
+                        </a>
+                    </li>
+                    @endif
+                    @endauth
                 </ul>
             </nav>
         </div>
@@ -144,18 +296,6 @@
 
         <div class="content">
             <div class="container-fluid">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
-                        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
-                    </div>
-                @endif
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
-                        <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
-                    </div>
-                @endif
                 @yield('content')
             </div>
         </div>
@@ -177,6 +317,94 @@
 <!-- AdminLTE -->
 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
 @stack('scripts')
+<script>
+    $(function() {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            showCloseButton: true,
+            timer: 5000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+
+        @if(session('success'))
+            Toast.fire({
+                icon: 'success',
+                title: '{{ session('success') }}'
+            });
+        @endif
+
+        @if(session('error'))
+            Toast.fire({
+                icon: 'error',
+                title: '{{ session('error') }}'
+            });
+        @endif
+
+        @if(session('warning'))
+            Toast.fire({
+                icon: 'warning',
+                title: '{{ session('warning') }}'
+            });
+        @endif
+
+        @if(session('info'))
+            Toast.fire({
+                icon: 'info',
+                title: '{{ session('info') }}'
+            });
+        @endif
+
+        // Global Delete Confirmation
+        $(document).on('submit', '.delete-form', function(e) {
+            e.preventDefault();
+            const form = this;
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                text: "Dữ liệu bị xóa sẽ không thể khôi phục lại!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Đồng ý xóa',
+                cancelButtonText: 'Hủy bỏ',
+                reverseButtons: true,
+                borderRadius: '16px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+        // Confirm delete with SweetAlert2
+        $(document).on('click', '.confirm-delete', function(e) {
+            e.preventDefault();
+            const form = $(this).closest('form');
+            
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: "Dữ liệu này sẽ bị xóa vĩnh viễn và không thể khôi phục!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Có, xóa ngay!',
+                cancelButtonText: 'Hủy bỏ',
+                reverseButtons: true,
+                borderRadius: '15px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>
 

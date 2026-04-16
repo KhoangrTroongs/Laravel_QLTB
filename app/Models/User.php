@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -23,10 +24,11 @@ class User extends Authenticatable
         'email',
         'password',
         'status',
+        'available',
         'employee_id',
         'phone',
         'address',
-        'avatar'
+        'avatar',
     ];
 
     /**
@@ -52,10 +54,49 @@ class User extends Authenticatable
         ];
     }
 
-    public function equipments()
+    public function equipments(): BelongsToMany
     {
         return $this->belongsToMany(Equipment::class, 'equipment_users')
-                ->withPivot('ngaymuon', 'status', 'description')
-                ->withTimestamps();
+            ->withPivot('ngaymuon', 'status', 'description')
+            ->withTimestamps();
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * Check if the user has a specific role.
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    /**
+     * Check if the user has any of the given roles.
+     *
+     * @param  string[]  $roles
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        return $this->roles()->whereIn('name', $roles)->exists();
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->hasRole('admin');
+    }
+
+    /**
+     * Check if the user is an editor.
+     */
+    public function isEditor(): bool
+    {
+        return $this->hasRole('editor');
     }
 }

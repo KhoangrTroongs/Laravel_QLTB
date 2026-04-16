@@ -91,12 +91,12 @@
                     <a href="{{ route('equipment.index') }}" class="btn btn-default ml-2 shadow-sm">
                         <i class="fas fa-arrow-left mr-1"></i>Quay Lại
                     </a>
-                    <button type="button" class="btn btn-danger float-right shadow-sm" onclick="if(confirm('Bạn có chắc muốn xóa thiết bị này?')) document.getElementById('delete-form').submit();">
+                    <button type="button" class="btn btn-danger float-right shadow-sm" onclick="$('#delete-form').submit()">
                         <i class="fas fa-trash mr-1"></i>Xóa Thiết Bị
                     </button>
                 </div>
             </form>
-            <form id="delete-form" action="{{ route('equipment.destroy', $equipment) }}" method="POST" style="display: none;">
+            <form id="delete-form" action="{{ route('equipment.destroy', $equipment) }}" method="POST" style="display: none;" class="delete-form">
                 @csrf @method('DELETE')
             </form>
         </div>
