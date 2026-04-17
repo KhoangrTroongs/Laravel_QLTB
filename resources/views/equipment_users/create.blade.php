@@ -59,7 +59,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label for="ngaymuon">Ngày Mượn <span class="text-danger">*</span></label>
                                 <input type="datetime-local" name="ngaymuon" id="ngaymuon"
@@ -70,12 +70,23 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="hantra">Hạn Trả</label>
+                                <input type="datetime-local" name="hantra" id="hantra"
+                                       class="form-control @error('hantra') is-invalid @enderror"
+                                       value="{{ old('hantra', now()->addDays(14)->format('Y-m-d\TH:i')) }}">
+                                @error('hantra')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label for="status">Trạng Thái <span class="text-danger">*</span></label>
                                 <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
                                     <option value="1" {{ old('status', '1') == '1' ? 'selected' : '' }}>Đang mượn</option>
-                                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Đã trả</option>
+                                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Chờ duyệt</option>
                                 </select>
                                 @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>

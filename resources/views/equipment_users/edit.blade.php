@@ -47,19 +47,43 @@
                         @enderror
                     </div>
 
-                    <div class="form-group">
-                        <label for="ngaymuon">Ngày Mượn</label>
-                        <input type="datetime-local" name="ngaymuon" id="ngaymuon" class="form-control @error('ngaymuon') is-invalid @enderror" value="{{ old('ngaymuon', \Carbon\Carbon::parse($equipmentUser->ngaymuon)->format('Y-m-d\TH:i')) }}">
-                        @error('ngaymuon')
-                            <span class="invalid-feedback">{{ $message }}</span>
-                        @enderror
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="ngaymuon">Ngày Mượn</label>
+                                <input type="datetime-local" name="ngaymuon" id="ngaymuon" class="form-control @error('ngaymuon') is-invalid @enderror" value="{{ old('ngaymuon', $equipmentUser->ngaymuon ? \Carbon\Carbon::parse($equipmentUser->ngaymuon)->format('Y-m-d\TH:i') : '') }}">
+                                @error('ngaymuon')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="hantra">Hạn Trả</label>
+                                <input type="datetime-local" name="hantra" id="hantra" class="form-control @error('hantra') is-invalid @enderror" value="{{ old('hantra', $equipmentUser->hantra ? \Carbon\Carbon::parse($equipmentUser->hantra)->format('Y-m-d\TH:i') : '') }}">
+                                @error('hantra')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="ngaytra">Ngày Trả</label>
+                                <input type="datetime-local" name="ngaytra" id="ngaytra" class="form-control @error('ngaytra') is-invalid @enderror" value="{{ old('ngaytra', $equipmentUser->ngaytra ? \Carbon\Carbon::parse($equipmentUser->ngaytra)->format('Y-m-d\TH:i') : '') }}">
+                                @error('ngaytra')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label for="status">Trạng Thái</label>
                         <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
+                            <option value="0" {{ old('status', $equipmentUser->status) == 0 ? 'selected' : '' }}>Chờ duyệt</option>
                             <option value="1" {{ old('status', $equipmentUser->status) == 1 ? 'selected' : '' }}>Đang mượn</option>
-                            <option value="0" {{ old('status', $equipmentUser->status) == 0 ? 'selected' : '' }}>Đã trả</option>
+                            <option value="2" {{ old('status', $equipmentUser->status) == 2 ? 'selected' : '' }}>Từ chối</option>
+                            <option value="3" {{ old('status', $equipmentUser->status) == 3 ? 'selected' : '' }}>Đã trả</option>
                         </select>
                         @error('status')
                             <span class="invalid-feedback">{{ $message }}</span>

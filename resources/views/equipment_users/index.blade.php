@@ -28,13 +28,22 @@
                     <label class="small font-weight-bold text-muted">TÌM KIẾM</label>
                     <input type="text" name="search" class="form-control shadow-sm" placeholder="Tên NV, thiết bị..." value="{{ request('search') }}">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="small font-weight-bold text-muted">TRẠNG THÁI</label>
                     <select name="status" class="form-control shadow-sm">
                         <option value="">Tất cả</option>
-                        <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Đang mượn</option>
-                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Đã trả</option>
+                        <option value="{{ \App\Models\EquipmentUser::STATUS_PENDING }}" {{ request('status') === (string)\App\Models\EquipmentUser::STATUS_PENDING ? 'selected' : '' }}>Chờ duyệt</option>
+                        <option value="{{ \App\Models\EquipmentUser::STATUS_BORROWING }}" {{ request('status') === (string)\App\Models\EquipmentUser::STATUS_BORROWING ? 'selected' : '' }}>Đang mượn</option>
+                        <option value="{{ \App\Models\EquipmentUser::STATUS_REJECTED }}" {{ request('status') === (string)\App\Models\EquipmentUser::STATUS_REJECTED ? 'selected' : '' }}>Từ chối</option>
+                        <option value="{{ \App\Models\EquipmentUser::STATUS_RETURNED }}" {{ request('status') === (string)\App\Models\EquipmentUser::STATUS_RETURNED ? 'selected' : '' }}>Đã trả</option>
                     </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="small font-weight-bold text-muted">LỌC NHANH</label>
+                    <a href="{{ route('equipment-users.index', array_merge(request()->except('overdue'), ['overdue' => request('overdue') == 1 ? 0 : 1])) }}" 
+                       class="btn {{ request('overdue') == 1 ? 'btn-danger' : 'btn-outline-danger' }} btn-block shadow-sm">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>Trễ hạn
+                    </a>
                 </div>
                 <div class="col-md-2">
                     <label class="small font-weight-bold text-muted">TỪ NGÀY</label>
@@ -57,7 +66,7 @@
             </div>
         </form>
 
-        <table class="table table-hover">
+        <table class="table table-hover" id="borrow-requests-table">
             <thead>
                 <tr>
                     <x-sortable-header field="id" title="#" width="80" class="text-center" />
@@ -74,7 +83,7 @@
             </thead>
             <tbody>
                 @forelse($records as $record)
-                <tr>
+                <tr id="record-row-{{ $record->id }}">
                     <td class="text-center text-muted font-weight-bold">{{ $record->id }}</td>
                     <td>
                         <div class="d-flex align-items-center">
@@ -109,27 +118,82 @@
                     </td>
                     <td>
                         <div class="text-dark"><i class="far fa-calendar-alt mr-1 text-info"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('d/m/Y') }}</div>
-                        <small class="text-muted"><i class="far fa-clock mr-1"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('H:i') }}</small>
+                        @if($record->hantra)
+                            <small class="text-danger font-weight-bold"><i class="fas fa-hourglass-half mr-1"></i>Hạn: {{ \Carbon\Carbon::parse($record->hantra)->format('d/m/Y') }}</small>
+                        @endif
+                        <div class="small text-muted"><i class="far fa-clock mr-1"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('H:i') }}</div>
                     </td>
-                    <td>
-                        @if($record->status == 1)
-                            <span class="badge badge-warning text-dark shadow-sm">
-                                <i class="fas fa-hand-holding mr-1"></i>Đang mượn
-                            </span>
-                        @else
-                            <span class="badge badge-success shadow-sm">
-                                <i class="fas fa-undo mr-1"></i>Đã trả đồ
-                            </span>
+                    <td class="status-cell">
+                        @php
+                            $status = $record->status;
+                            $badgeClass = 'secondary';
+                            $statusText = 'Không xác định';
+                            $icon = 'question';
+                            
+                            if ($status == \App\Models\EquipmentUser::STATUS_PENDING) {
+                                $badgeClass = 'info';
+                                $statusText = 'Chờ duyệt';
+                                $icon = 'clock';
+                            } elseif ($status == \App\Models\EquipmentUser::STATUS_BORROWING) {
+                                $badgeClass = 'warning text-dark';
+                                $statusText = 'Đang mượn';
+                                $icon = 'hand-holding';
+                            } elseif ($status == \App\Models\EquipmentUser::STATUS_REJECTED) {
+                                $badgeClass = 'danger';
+                                $statusText = 'Từ chối';
+                                $icon = 'times-circle';
+                            } elseif ($status == \App\Models\EquipmentUser::STATUS_RETURNED) {
+                                $badgeClass = 'success';
+                                $statusText = 'Đã trả';
+                                $icon = 'check-circle';
+                            }
+                        @endphp
+                        <span class="badge badge-{{ $badgeClass }} shadow-sm">
+                            <i class="fas fa-{{ $icon }} mr-1"></i>{{ $statusText }}
+                        </span>
+                        @if($status == \App\Models\EquipmentUser::STATUS_BORROWING && $record->hantra && $record->hantra < now())
+                            <div class="mt-2 text-overdue">
+                                <span class="badge badge-danger animate__animated animate__pulse animate__infinite">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>QUÁ HẠN
+                                </span>
+                            </div>
                         @endif
                     </td>
-                    <td class="text-center">
+                    <td class="text-center action-cell">
                         <div class="btn-group">
-                            <a href="{{ route('equipment-users.edit', $record) }}" class="btn btn-warning btn-xs shadow-sm me-1" title="Cập nhật">
+                            @if($status == \App\Models\EquipmentUser::STATUS_PENDING)
+                                <form action="{{ route('equipment-users.approve', $record) }}" method="POST" class="d-inline">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="btn btn-success btn-xs mr-1" title="Duyệt">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form action="{{ route('equipment-users.reject', $record) }}" method="POST" class="d-inline">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="btn btn-danger btn-xs mr-1" title="Từ chối">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            @endif
+
+                            @if($status == \App\Models\EquipmentUser::STATUS_BORROWING)
+                                <form action="{{ route('equipment-users.return', $record) }}" method="POST" class="d-inline">
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="btn btn-info btn-xs mr-1" title="Xác nhận trả">
+                                        <i class="fas fa-undo"></i>
+                                    </button>
+                                </form>
+                            @endif
+
+                            <a href="{{ route('equipment-users.show', $record) }}" class="btn btn-primary btn-xs mr-1" title="Chi tiết">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ route('equipment-users.edit', $record) }}" class="btn btn-warning btn-xs mr-1" title="Cập nhật">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <form action="{{ route('equipment-users.destroy', $record) }}" method="POST" class="d-inline">
                                 @csrf @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-xs shadow-sm confirm-delete" title="Xóa">
+                                <button type="button" class="btn btn-danger btn-xs confirm-delete" title="Xóa">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
@@ -138,7 +202,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-5 text-muted">
+                    <td colspan="6" class="text-center py-5 text-muted empty-row">
                         <i class="fas fa-receipt fa-3x mb-3 opacity-25"></i>
                         <p>Chưa có lịch sử mượn thiết bị nào.</p>
                     </td>
@@ -154,4 +218,73 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        if (typeof window.Echo !== 'undefined') {
+            window.Echo.private('App.Models.User.{{ auth()->id() }}')
+                .notification((notification) => {
+                    if (notification.type === 'App\\Notifications\\NewBorrowRequest') {
+                        // Remove empty row if existence
+                        $('.empty-row').closest('tr').remove();
+
+                        const tableBody = $('#borrow-requests-table tbody');
+                        const showUrl = `{{ url('equipment-users') }}/${notification.record_id}`;
+                        const editUrl = `{{ url('equipment-users') }}/${notification.record_id}/edit`;
+                        const approveUrl = `{{ url('equipment-users') }}/${notification.record_id}/approve`;
+                        const rejectUrl = `{{ url('equipment-users') }}/${notification.record_id}/reject`;
+                        
+                        const newRow = `
+                            <tr id="record-row-${notification.record_id}" class="animate__animated animate__fadeInDown" style="background-color: #f0fdf4;">
+                                <td class="text-center text-muted font-weight-bold">${notification.record_id}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(notification.user_name)}&background=random" 
+                                             class="rounded-circle mr-2 border" style="width: 35px; height: 35px; object-fit: cover;">
+                                        <div>
+                                            <div class="font-weight-bold text-dark">${notification.user_name}</div>
+                                            <small class="text-muted">Mới gửi</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="font-weight-bold text-primary">${notification.equipment_name}</div>
+                                </td>
+                                <td>
+                                    <div class="text-dark"><i class="far fa-calendar-alt mr-1 text-info"></i>vừa xong</div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info shadow-sm">
+                                        <i class="fas fa-clock mr-1"></i>Chờ duyệt
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group">
+                                        <form action="${approveUrl}" method="POST" class="d-inline">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn btn-success btn-xs mr-1" title="Duyệt"><i class="fas fa-check"></i></button>
+                                        </form>
+                                        <form action="${rejectUrl}" method="POST" class="d-inline">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn btn-danger btn-xs mr-1" title="Từ chối"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        <a href="${showUrl}" class="btn btn-primary btn-xs mr-1" title="Chi tiết"><i class="fas fa-eye"></i></a>
+                                        <a href="${editUrl}" class="btn btn-warning btn-xs mr-1" title="Cập nhật"><i class="fas fa-edit"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.prepend(newRow);
+                        
+                        // Flash effect
+                        setTimeout(() => {
+                            $(`#record-row-${notification.record_id}`).css('background-color', 'transparent');
+                        }, 5000);
+                    }
+                });
+        }
+    });
+</script>
+@endpush
 @endsection

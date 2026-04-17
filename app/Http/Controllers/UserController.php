@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -20,16 +21,16 @@ class UserController extends Controller
 
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%')
-                  ->orWhere('employee_id', 'like', '%' . $request->search . '%')
-                  ->orWhere('phone', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('email', 'like', '%'.$request->search.'%')
+                    ->orWhere('employee_id', 'like', '%'.$request->search.'%')
+                    ->orWhere('phone', 'like', '%'.$request->search.'%');
             });
         }
 
         $sortField = $request->get('sort', 'id');
-        $sortDir   = $request->get('direction', 'asc');
-        $allowed   = ['id', 'name', 'email', 'employee_id', 'status'];
+        $sortDir = $request->get('direction', 'asc');
+        $allowed = ['id', 'name', 'email', 'employee_id', 'status'];
         if (! in_array($sortField, $allowed)) {
             $sortField = 'id';
         }
@@ -64,6 +65,10 @@ class UserController extends Controller
 
     public function show(User $user)
     {
+        $user->load(['equipments' => function ($q) {
+            $q->withTrashed()->orderBy('equipment_users.id', 'desc');
+        }, 'roles']);
+
         return view('users.show', compact('user'));
     }
 
@@ -84,7 +89,7 @@ class UserController extends Controller
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+                Storage::disk('public')->delete($user->avatar);
             }
             $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
         }

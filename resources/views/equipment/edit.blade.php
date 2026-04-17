@@ -1,134 +1,182 @@
 @extends('layouts.app')
 
 @section('title', 'Sửa Thiết Bị')
-@section('page-title', 'Sửa Thông Tin Thiết Bị')
+@section('page-title', 'Chỉnh Sửa Thiết Bị')
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('equipment.index') }}">Thiết Bị</a></li>
-    <li class="breadcrumb-item active">Sửa</li>
+    <li class="breadcrumb-item active">Chỉnh Sửa</li>
 @endsection
 
 @section('content')
 <div class="row">
-    <div class="col-md-8">
-        <div class="card card-warning card-outline">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-edit mr-2"></i>Sửa Thiết Bị: {{ $equipment->name }}</h3>
+    <div class="col-md-9">
+        <div class="card card-warning card-outline shadow-sm" style="border-radius: 12px;">
+            <div class="card-header bg-white">
+                <h3 class="card-title font-weight-bold text-warning-emphasis"><i class="fas fa-edit mr-2"></i>Sửa: {{ $equipment->name }}</h3>
             </div>
             <form action="{{ route('equipment.update', $equipment) }}" method="POST" enctype="multipart/form-data">
-                @csrf @method('PUT')
+                @csrf
+                @method('PUT')
                 <div class="card-body">
-                    <div class="text-center mb-4">
-                        <div class="position-relative d-inline-block">
-                            @if($equipment->image)
-                                <img id="image-preview" src="{{ asset('storage/' . $equipment->image) }}" 
-                                     class="shadow border rounded" style="width: 150px; height: 100px; object-fit: cover;">
-                            @else
-                                <img id="image-preview" src="https://via.placeholder.com/150?text=Equipment" 
-                                     class="shadow border rounded" style="width: 150px; height: 100px; object-fit: cover;">
-                            @endif
-                            <label for="image" class="position-absolute btn btn-xs btn-primary rounded-circle" style="bottom: -10px; right: -10px; width: 30px; height: 30px; padding-top: 5px;">
-                                <i class="fas fa-camera"></i>
-                            </label>
-                            <input type="file" name="image" id="image" class="d-none" accept="image/*" onchange="previewEquipmentImage(this)">
+                    <div class="row">
+                        <div class="col-md-4 text-center border-right">
+                            <div class="position-relative d-inline-block mt-4">
+                                <img id="image-preview" src="{{ $equipment->image ? asset('storage/' . $equipment->image) : 'https://via.placeholder.com/200?text=No+Image' }}" 
+                                     class="shadow-sm border rounded" style="width: 200px; height: 150px; object-fit: cover;">
+                                <label for="image" class="position-absolute btn btn-sm btn-warning rounded-circle shadow" 
+                                       style="bottom: -10px; right: -10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-camera text-white"></i>
+                                </label>
+                                <input type="file" name="image" id="image" class="d-none" accept="image/*" onchange="previewEquipmentImage(this)">
+                            </div>
+                            <p class="small text-muted mt-3">Thay đổi hình ảnh minh họa</p>
                         </div>
-                        <div class="small text-muted mt-2">Hình ảnh thiết bị</div>
-                        @error('image') <div class="text-danger small">{{ $message }}</div> @enderror
-                    </div>
 
-                    @if($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+                        <div class="col-md-8">
+                            <div class="form-group mb-3">
+                                <label class="text-muted small font-weight-bold text-uppercase">Tên thiết bị <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
+                                       value="{{ old('name', $equipment->name) }}">
+                                @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="text-muted small font-weight-bold text-uppercase">Model / Mã SP <span class="text-danger">*</span></label>
+                                        <input type="text" name="model" class="form-control @error('model') is-invalid @enderror" 
+                                               value="{{ old('model', $equipment->model) }}">
+                                        @error('model') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="text-muted small font-weight-bold text-uppercase">Loại thiết bị <span class="text-danger">*</span></label>
+                                        <select name="category_id" id="category_id" class="form-control @error('category_id') is-invalid @enderror">
+                                            @foreach($categories as $cat)
+                                                <option value="{{ $cat->id }}" {{ old('category_id', $equipment->category_id) == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="text-muted small font-weight-bold text-uppercase">Tình trạng</label>
+                                        <select name="status" class="form-control">
+                                            <option value="1" {{ old('status', $equipment->status) == '1' ? 'selected' : '' }}>Sẵn sàng sử dụng</option>
+                                            <option value="0" {{ old('status', $equipment->status) == '0' ? 'selected' : '' }}>Đang bảo trì/Hư hỏng</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="text-muted small font-weight-bold text-uppercase">Trạng thái rác</label>
+                                        <div class="pt-2">
+                                            @if($equipment->trashed())
+                                                <span class="badge badge-danger px-3 py-2">Đã xóa mềm</span>
+                                            @else
+                                                <span class="badge badge-success px-3 py-2">Đang hoạt động</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="text-muted small font-weight-bold text-uppercase">Mô tả thêm</label>
+                                <textarea name="description" class="form-control" rows="2">{{ old('description', $equipment->description) }}</textarea>
+                            </div>
                         </div>
-                    @endif
-
-                    <div class="form-group">
-                        <label for="name">Tên Thiết Bị <span class="text-danger">*</span></label>
-                        <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror"
-                               value="{{ old('name', $equipment->name) }}" placeholder="VD: iPhone 15, Laptop Dell...">
-                        @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
                     </div>
 
-                    <div class="form-group">
-                        <label for="model">Model <span class="text-danger">*</span></label>
-                        <input type="text" name="model" id="model" class="form-control @error('model') is-invalid @enderror"
-                               value="{{ old('model', $equipment->model) }}" placeholder="VD: A2847, XPS 15...">
-                        @error('model')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description">Thông Tin Mô Tả</label>
-                        <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror"
-                                  rows="3" placeholder="Mô tả thêm về thiết bị...">{{ old('description', $equipment->description) }}</textarea>
-                        @error('description')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="status">Trạng Thái <span class="text-danger">*</span></label>
-                        <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
-                            <option value="1" {{ old('status', $equipment->status) == '1' ? 'selected' : '' }}>Hoạt động bình thường</option>
-                            <option value="0" {{ old('status', $equipment->status) == '0' ? 'selected' : '' }}>Bị hư</option>
-                        </select>
-                        @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div id="specs-section" class="mt-4 pt-3 border-top">
+                        <h5 class="text-warning font-weight-bold mb-3"><i class="fas fa-microchip mr-2"></i>Thông số kỹ thuật</h5>
+                        <div id="dynamic-specs-container" class="row">
+                            <!-- JS will inject fields here -->
+                        </div>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-warning shadow-sm">
-                        <i class="fas fa-save mr-1"></i>Cập Nhật Thiết Bị
-                    </button>
-                    <a href="{{ route('equipment.index') }}" class="btn btn-default ml-2 shadow-sm">
-                        <i class="fas fa-arrow-left mr-1"></i>Quay Lại
-                    </a>
-                    <button type="button" class="btn btn-danger float-right shadow-sm" onclick="$('#delete-form').submit()">
-                        <i class="fas fa-trash mr-1"></i>Xóa Thiết Bị
-                    </button>
+
+                <div class="card-footer bg-white border-top d-flex justify-content-between">
+                    <div>
+                        <a href="{{ route('equipment.index') }}" class="btn btn-default mr-2">
+                            <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                        </a>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-warning px-5 shadow-sm font-weight-bold">
+                            <i class="fas fa-save mr-1"></i> Lưu thay đổi
+                        </button>
+                    </div>
                 </div>
-            </form>
-            <form id="delete-form" action="{{ route('equipment.destroy', $equipment) }}" method="POST" style="display: none;" class="delete-form">
-                @csrf @method('DELETE')
             </form>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-secondary card-outline">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-info mr-2"></i>Thông Tin Hiện Tại</h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-sm table-borderless">
-                    <tr><th>ID:</th><td>{{ $equipment->id }}</td></tr>
-                    <tr><th>Tên:</th><td>{{ $equipment->name }}</td></tr>
-                    <tr><th>Model:</th><td>{{ $equipment->model }}</td></tr>
-                    <tr>
-                        <th>Trạng thái:</th>
-                        <td>
-                            @if($equipment->status)
-                                <span class="badge badge-success">Hoạt động</span>
-                            @else
-                                <span class="badge badge-danger">Bị hư</span>
-                            @endif
-                        </td>
-                    </tr>
-                    <tr><th>Cập nhật:</th><td>{{ $equipment->updated_at->format('d/m/Y H:i') }}</td></tr>
-                </table>
+
+    <div class="col-md-3">
+        <div class="card card-outline card-warning shadow-sm">
+            <div class="card-header"><h3 class="card-title font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Thông tin thêm</h3></div>
+            <div class="card-body small">
+                <p><strong>Ngày tạo:</strong> {{ $equipment->created_at->format('d/m/Y H:i') }}</p>
+                <p><strong>Cập nhật:</strong> {{ $equipment->updated_at->format('d/m/Y H:i') }}</p>
+                <hr>
+                <form action="{{ route('equipment.destroy', $equipment) }}" method="POST" class="delete-form">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger btn-block btn-sm">
+                        <i class="fas fa-trash-alt mr-1"></i> Xóa thiết bị
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+@endsection
+
 @push('scripts')
 <script>
+    const categoriesSpecs = @json($categories->pluck('specs', 'id'));
+    const currentSpecs = @json($equipment->spec ?? []);
+
+    $(document).ready(function() {
+        $('#category_id').change(function() {
+            const categoryId = $(this).val();
+            const container = $('#dynamic-specs-container');
+            const section = $('#specs-section');
+            
+            container.empty();
+            
+            if (categoryId && categoriesSpecs[categoryId] && categoriesSpecs[categoryId].length > 0) {
+                const specs = categoriesSpecs[categoryId];
+                
+                specs.forEach(specName => {
+                    const value = currentSpecs[specName] || '';
+                    const html = `
+                        <div class="col-md-6 mb-3 animate__animated animate__fadeIn">
+                            <div class="form-group mb-0">
+                                <label class="text-muted small font-weight-bold text-uppercase">${specName}</label>
+                                <input type="text" name="specs[${specName}]" class="form-control" 
+                                       placeholder="Nhập ${specName}..." value="${value}">
+                            </div>
+                        </div>
+                    `;
+                    container.append(html);
+                });
+                
+                section.slideDown();
+            } else {
+                section.slideUp();
+            }
+        });
+
+        // Trigger on load
+        $('#category_id').change();
+    });
+
     function previewEquipmentImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -138,5 +186,3 @@
     }
 </script>
 @endpush
-@endsection
-

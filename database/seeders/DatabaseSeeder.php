@@ -20,16 +20,24 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'employee_id' => 'ADMIN001',
-            'name' => 'Administartor',
-            'email'=> env('ADMIN_MAIL'),
+            'name' => 'Administrator',
+            'email' => env('ADMIN_MAIL'),
             'password' => env('ADMIN_PASS'),
+            'status' => 1,
+            'available' => 1,
         ]);
-    
+
         User::factory(99)->create();
 
+        $this->call([
+            CategorySeeder::class,
+            RoleSeeder::class,
+        ]);
+
         Equipment::factory(100)->create();
-
-        EquipmentUser::factory(200)->create();
+        
+        $this->call([
+            EquipmentUserSeeder::class,
+        ]);
     }
-
 }

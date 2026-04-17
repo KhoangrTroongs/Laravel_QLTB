@@ -43,26 +43,89 @@
                 <hr>
 
                 <div class="row mt-3">
-                    <div class="col-md-4 text-center">
-                        <p class="text-muted mb-1">Ngày mượn</p>
-                        <h5>{{ \Carbon\Carbon::parse($equipmentUser->ngaymuon)->format('d/m/Y H:i') }}</h5>
+                    <div class="col-md-3 text-center">
+                        <p class="text-muted mb-1 small font-weight-bold">NGÀY MƯỢN</p>
+                        <h6>{{ \Carbon\Carbon::parse($equipmentUser->ngaymuon)->format('d/m/Y H:i') }}</h6>
                     </div>
-                    <div class="col-md-4 text-center">
-                        <p class="text-muted mb-1">Trạng thái</p>
-                        @if($equipmentUser->status == 1)
-                            <span class="badge badge-warning p-2">ĐANG MƯỢN</span>
-                        @else
-                            <span class="badge badge-success p-2">ĐÃ TRẢ</span>
-                        @endif
+                    <div class="col-md-3 text-center border-left">
+                        <p class="text-muted mb-1 small font-weight-bold">HẠN TRẢ</p>
+                        <h6 class="{{ $equipmentUser->status == 1 && $equipmentUser->hantra < now() ? 'text-danger font-weight-bold' : '' }}">
+                            {{ $equipmentUser->hantra ? \Carbon\Carbon::parse($equipmentUser->hantra)->format('d/m/Y') : 'Không có' }}
+                        </h6>
                     </div>
-                    <div class="col-md-4 text-center">
-                        <p class="text-muted mb-1">Ghi chú</p>
-                        <p>{{ $equipmentUser->description ?? '-' }}</p>
+                    @if($equipmentUser->status == \App\Models\EquipmentUser::STATUS_RETURNED)
+                    <div class="col-md-3 text-center border-left">
+                        <p class="text-muted mb-1 small font-weight-bold">NGÀY TRẢ THỰC TẾ</p>
+                        <h6 class="text-success">{{ $equipmentUser->ngaytra ? \Carbon\Carbon::parse($equipmentUser->ngaytra)->format('d/m/Y H:i') : 'N/A' }}</h6>
                     </div>
+                    @endif
+                    <div class="col-md-{{ $equipmentUser->status == \App\Models\EquipmentUser::STATUS_RETURNED ? 3 : 6 }} text-center border-left">
+                        <p class="text-muted mb-1 small font-weight-bold">TRẠNG THÁI</p>
+                        @php
+                            $status = $equipmentUser->status;
+                            $badgeClass = 'secondary';
+                            $statusText = 'KHÔNG XÁC ĐỊNH';
+                            
+                            if ($status == \App\Models\EquipmentUser::STATUS_PENDING) {
+                                $badgeClass = 'info';
+                                $statusText = 'CHỜ DUYỆT';
+                            } elseif ($status == \App\Models\EquipmentUser::STATUS_BORROWING) {
+                                $badgeClass = 'warning';
+                                $statusText = 'ĐANG MƯỢN';
+                            } elseif ($status == \App\Models\EquipmentUser::STATUS_REJECTED) {
+                                $badgeClass = 'danger';
+                                $statusText = 'TỪ CHỐI';
+                            } elseif ($status == \App\Models\EquipmentUser::STATUS_RETURNED) {
+                                $badgeClass = 'success';
+                                $statusText = 'ĐÃ TRẢ';
+                            }
+                        @endphp
+                        <span class="badge badge-{{ $badgeClass }} p-2">{{ $statusText }}</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded">
+                    <p class="text-muted mb-1 small font-weight-bold"><i class="fas fa-comment-dots mr-2"></i>GHI CHÚ / MÔ TẢ PHIẾU</p>
+                    <p class="mb-0">{{ $equipmentUser->description ?? 'Không có ghi chú.' }}</p>
                 </div>
             </div>
             <div class="card-footer">
-                <a href="{{ route('equipment-users.index') }}" class="btn btn-default">Quay lại danh sách</a>
+                <a href="{{ route('equipment-users.index') }}" class="btn btn-default">
+                    <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách
+                </a>
+
+                <div class="float-right">
+                    @if($equipmentUser->status == \App\Models\EquipmentUser::STATUS_PENDING)
+                        <form action="{{ route('equipment-users.approve', $equipmentUser) }}" method="POST" class="d-inline">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="btn btn-success shadow-sm mr-1">
+                                <i class="fas fa-check mr-1"></i> Duyệt phiếu
+                            </button>
+                        </form>
+                        <form action="{{ route('equipment-users.reject', $equipmentUser) }}" method="POST" class="d-inline">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="btn btn-danger shadow-sm mr-1">
+                                <i class="fas fa-times mr-1"></i> Từ chối
+                            </button>
+                        </form>
+                    @endif
+
+                    @if($equipmentUser->status == \App\Models\EquipmentUser::STATUS_BORROWING)
+                        <form action="{{ route('equipment-users.return', $equipmentUser) }}" method="POST" class="d-inline">
+                            @csrf @method('PATCH')
+                            <button type="submit" class="btn btn-info shadow-sm mr-1">
+                                <i class="fas fa-undo mr-1"></i> Xác nhận trả
+                            </button>
+                        </form>
+                    @endif
+
+                    <form action="{{ route('equipment-users.destroy', $equipmentUser) }}" method="POST" class="d-inline">
+                        @csrf @method('DELETE')
+                        <button type="button" class="btn btn-outline-danger shadow-sm confirm-delete">
+                            <i class="fas fa-trash mr-1"></i> Xóa
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>

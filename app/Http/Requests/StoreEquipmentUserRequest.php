@@ -23,23 +23,25 @@ class StoreEquipmentUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id'      => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id',
             'equipment_id' => 'required|exists:equipment,id',
-            'ngaymuon'     => 'required|date',
-            'status'       => 'required|in:0,1',
-            'description'  => 'nullable|string|max:1000',
+            'ngaymuon' => 'required|date',
+            'hantra' => 'nullable|date|after_or_equal:ngaymuon',
+            'status' => 'required|in:0,1',
+            'description' => 'nullable|string|max:1000',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'user_id.required'      => 'Vui lòng chọn nhân viên.',
-            'user_id.exists'        => 'Nhân viên không tồn tại.',
+            'user_id.required' => 'Vui lòng chọn nhân viên.',
+            'user_id.exists' => 'Nhân viên không tồn tại.',
             'equipment_id.required' => 'Vui lòng chọn thiết bị.',
-            'equipment_id.exists'   => 'Thiết bị không tồn tại.',
-            'ngaymuon.required'     => 'Ngày mượn không được để trống.',
-            'status.required'       => 'Trạng thái không được để trống.',
+            'equipment_id.exists' => 'Thiết bị không tồn tại.',
+            'ngaymuon.required' => 'Ngày mượn không được để trống.',
+            'status.required' => 'Trạng thái không được để trống.',
+            'hantra.after_or_equal' => 'Hạn trả phải sau hoặc bằng ngày mượn.',
         ];
     }
 }

@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('equipment_users', function (Blueprint $table) {
-            //
+            $table->dateTime('ngaytra')->nullable()->after('ngaymuon');
+            $table->dateTime('hantra')->nullable()->after('ngaymuon');
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('equipment_users', function (Blueprint $table) {
-            //
+            $table->dropColumn(['ngaytra', 'hantra']);
         });
     }
 };

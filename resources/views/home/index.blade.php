@@ -42,10 +42,38 @@
 <!-- Equipment Grid -->
 <div class="container py-5 mt-n4">
     <div class="bg-white p-4 p-md-5 shadow-sm" style="border-radius: 30px; margin-top: -60px; position: relative; z-index: 10;">
-        @if(request('search'))
+        <!-- Category Filter -->
+        <div class="mb-5">
+            <h6 class="text-uppercase text-muted font-weight-bold mb-4 small" style="letter-spacing: 2px;">
+                <i class="fas fa-filter mr-2"></i>Duyệt Theo Loại
+            </h6>
+            <div class="d-flex flex-wrap" style="gap: 12px;">
+                <a href="{{ route('home', array_merge(request()->except('category_id'))) }}" 
+                   class="btn {{ !request('category_id') ? 'btn-primary' : 'btn-light border text-muted' }}" 
+                   style="border-radius: 12px; font-weight: 600; padding: 0.6rem 1.25rem;">
+                    Tất cả
+                </a>
+                @foreach($categories as $cat)
+                    <a href="{{ route('home', array_merge(request()->all(), ['category_id' => $cat->id])) }}" 
+                       class="btn {{ request('category_id') == $cat->id ? 'btn-primary' : 'btn-light border text-muted' }}" 
+                       style="border-radius: 12px; font-weight: 600; padding: 0.6rem 1.25rem;">
+                        {{ $cat->name }}
+                    </a>
+                @endforeach
+            </div>
+        </div>
+
+        @if(request('search') || request('category_id'))
             <div class="d-flex align-items-center justify-content-between mb-5">
                 <h4 class="mb-0 font-weight-bold">
-                    <span class="text-muted">Kết quả cho:</span> "{{ request('search') }}"
+                    @if(request('search'))
+                        <span class="text-muted">Kết quả cho:</span> "{{ request('search') }}"
+                    @endif
+                    @if(request('category_id'))
+                        @php $catName = $categories->where('id', request('category_id'))->first()->name ?? ''; @endphp
+                        @if(request('search')) & @endif
+                        <span class="text-muted">Loại:</span> {{ $catName }}
+                    @endif
                 </h4>
                 <a href="{{ route('home') }}" class="btn btn-light px-4" style="border-radius: 12px;">
                     <i class="fas fa-times mr-2 text-danger"></i>Xoá bộ lọc
@@ -83,9 +111,14 @@
                                     {{ $item->name }}
                                 </h5>
                                 <div class="text-muted small mb-3">
-                                    <span class="bg-light px-2 py-1 rounded" style="font-size: 0.75rem;">
+                                    <span class="bg-light px-2 py-1 rounded mr-1" style="font-size: 0.75rem;">
                                         <i class="fas fa-tag mr-1 opacity-50"></i>{{ $item->model }}
                                     </span>
+                                    @if($item->category)
+                                        <span class="badge badge-info shadow-sm" style="font-size: 0.65rem; border-radius: 8px;">
+                                            {{ $item->category->name }}
+                                        </span>
+                                    @endif
                                 </div>
                                 
                                 @if($item->description)

@@ -15,6 +15,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Compiled Assets -->
+    <script>
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}',
+            userId: {{ auth()->check() ? auth()->id() : 'null' }}
+        };
+    </script>
+    @vite(['resources/js/app.js'])
     <style>
         body { font-family: 'Be Vietnam Pro', sans-serif; background-color: #f1f5f9; color: #1e293b; overflow-x: hidden; }
         
@@ -53,10 +61,14 @@
         .table tbody td { padding: 1.25rem 1.5rem; vertical-align: middle; color: #334155; border-top: 1px solid #f1f5f9; font-size: 0.95rem; }
         
         /* Buttons & Badges */
-        .btn { border-radius: 12px; font-weight: 600; padding: 0.75rem 1.5rem; transition: all 0.2s; letter-spacing: 0.025em; }
-        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
-        .btn-primary { background: #2563eb; border: none; box-shadow: 0 4px 12px rgba(37,99,235,0.2); }
+        .btn { border-radius: 10px; font-weight: 600; padding: 0.6rem 1.25rem; transition: all 0.2s; letter-spacing: 0.025em; }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 8px; }
+        .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 6px; }
+        .btn-primary { background: #2563eb; border: none; box-shadow: 0 4px 12px rgba(37,99,235,0.15); }
         .btn-primary:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37,99,235,0.3); }
+
+        .badge { padding: 0.35rem 0.7rem; border-radius: 8px; font-weight: 600; font-size: 0.75rem; letter-spacing: 0.025em; }
+        .badge-pill { border-radius: 50rem; padding-left: 1rem; padding-right: 1rem; }
         
         .btn-input { height: calc(1.5em + 1.5rem + 2px); display: flex !important; align-items: center; justify-content: center; padding-top: 0 !important; padding-bottom: 0 !important; }
 
@@ -173,17 +185,87 @@
                 </span>
             </li>
             @auth
+            <!-- Notifications Dropdown Menu -->
+            <li class="nav-item dropdown">
+                <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false" title="Thông báo" style="padding: 10px 15px; display: flex; align-items: center; position: relative;">
+                    <i class="far fa-bell" style="font-size: 1.5rem;"></i>
+                    @if(auth()->user()->unreadNotifications->count() > 0)
+                        <span class="badge badge-danger navbar-badge" style="font-size: 0.65rem; top: 4px; right: 6px; padding: 2px 4px; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff;">
+                            {{ auth()->user()->unreadNotifications->count() }}
+                        </span>
+                    @endif
+                </a>
+                <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right border-0 shadow-lg mt-2" style="border-radius: 15px; overflow: hidden; min-width: 320px;">
+                    <div class="dropdown-header text-center py-3 bg-light border-bottom">
+                        <span class="text-dark font-weight-bold" style="font-size: 1rem;">
+                            <i class="fas fa-bell mr-2 text-primary"></i>Thông báo ({{ auth()->user()->unreadNotifications->count() }})
+                        </span>
+                    </div>
+                    <div class="dropdown-divider m-0"></div>
+                    <div style="max-height: 350px; overflow-y: auto;">
+                        @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
+                            @php
+                                $type = $notification->data['type'] ?? 'default';
+                                $bgClass = match($type) {
+                                    'overdue_reminder' => 'danger',
+                                    'new_request' => 'info',
+                                    'request_response' => 'success',
+                                    'missed_request' => 'warning',
+                                    default => 'secondary'
+                                };
+                                $iconClass = match($type) {
+                                    'overdue_reminder' => 'fa-exclamation-triangle',
+                                    'new_request' => 'fa-envelope',
+                                    'request_response' => 'fa-check-circle',
+                                    'missed_request' => 'fa-history',
+                                    default => 'fa-info-circle'
+                                };
+                            @endphp
+                            <form action="{{ route('profile.notifications.markAsRead', $notification->id) }}" method="POST" id="read-notif-{{ $notification->id }}">
+                                @csrf
+                                <a href="javascript:void(0)" onclick="document.getElementById('read-notif-{{ $notification->id }}').submit();" class="dropdown-item py-3 border-bottom h-100 transition-all hover-bg-light">
+                                    <div class="media align-items-center">
+                                        <div class="bg-{{ $bgClass }} rounded-circle shadow-sm mr-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; flex-shrink: 0;">
+                                            <i class="fas {{ $iconClass }} text-white"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <p class="mb-0 text-dark font-weight-bold small" style="line-height: 1.2;">{{ $notification->data['title'] }}</p>
+                                            <p class="mb-1 text-muted small mt-1" style="line-height: 1.3;">{{ Str::limit($notification->data['message'], 65) }}</p>
+                                            <span class="text-xs text-primary font-weight-600">
+                                                <i class="far fa-clock mr-1"></i>{{ $notification->created_at->diffForHumans() }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </form>
+                        @empty
+                            <div class="dropdown-item text-center py-5 text-muted">
+                                <i class="fas fa-check-double fa-3x mb-3 opacity-25"></i>
+                                <p class="mb-0 font-weight-bold">Không có thông báo mới</p>
+                            </div>
+                        @endforelse
+                    </div>
+                    <div class="dropdown-divider m-0"></div>
+                    <a href="{{ route('profile.notifications.index') }}" class="dropdown-item dropdown-footer text-center py-2 bg-light font-weight-bold text-primary">
+                        Xem tất cả thông báo <i class="fas fa-chevron-right ml-1 small"></i>
+                    </a>
+                </div>
+            </li>
+
             <li class="nav-item">
-                <a href="{{ route('home') }}" class="nav-link" title="Trang chủ">
-                    <i class="fas fa-home"></i>
+                <a href="{{ route('home') }}" class="nav-link" title="Trang chủ" style="padding: 10px 15px;">
+                    <i class="fas fa-home" style="font-size: 1.4rem;"></i>
                 </a>
             </li>
             <li class="nav-item dropdown">
                 <a class="nav-link d-flex align-items-center" href="#" id="navbarDropdown"
                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     @if(Auth::user()->avatar)
-                        <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
-                             class="rounded-circle mr-2 border"
+                        @php
+                            $userAvatarUrl = str_starts_with(Auth::user()->avatar, 'http') ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar);
+                        @endphp
+                        <img src="{{ $userAvatarUrl }}"
+                             class="rounded-circle mr-2 border shadow-xs"
                              style="width: 32px; height: 32px; object-fit: cover;">
                     @else
                         <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff"
@@ -231,6 +313,7 @@
         <div class="sidebar">
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+                    @if(Auth::user()->hasAnyRole(['admin', 'editor']))
                     <li class="nav-item">
                         <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -244,9 +327,35 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('equipment-users.index') }}" class="nav-link {{ request()->routeIs('equipment-users.*') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-handshake"></i>
-                            <p>Mượn Thiết Bị</p>
+                        <a href="{{ route('categories.index') }}" class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tags"></i>
+                            <p>Loại Thiết Bị</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('equipment-users.index') }}" class="nav-link {{ request()->routeIs('equipment-users.index') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-handshake text-info"></i>
+                            <p>Phân Phát Thiết Bị</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('equipment-users.queue') }}" class="nav-link {{ request()->routeIs('equipment-users.queue') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-hourglass-start text-warning"></i>
+                            <p>
+                                Hàng Đợi Duyệt
+                                @php $pendingCount = \App\Models\EquipmentUser::where('status', 0)->count(); @endphp
+                                @if($pendingCount > 0)
+                                    <span class="badge badge-warning right shadow-xs">{{ $pendingCount }}</span>
+                                @endif
+                            </p>
+                        </a>
+                    </li>
+                    @endif
+                    
+                    <li class="nav-item">
+                        <a href="{{ route('profile.notifications.index') }}" class="nav-link {{ request()->routeIs('profile.notifications.index') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-bell"></i>
+                            <p>Thông Báo</p>
                         </a>
                     </li>
                     @auth
@@ -286,7 +395,13 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
+                            <li class="breadcrumb-item">
+                                @if(Auth::user()->hasAnyRole(['admin', 'editor']))
+                                    <a href="{{ route('dashboard') }}">Home</a>
+                                @else
+                                    <a href="{{ route('home') }}">Home</a>
+                                @endif
+                            </li>
                             @yield('breadcrumb')
                         </ol>
                     </div>
@@ -404,6 +519,47 @@
             });
         });
     });
+
+    // Real-time Notifications with Echo
+    @auth
+        if (typeof window.Echo !== 'undefined') {
+            window.Echo.private(`App.Models.User.{{ auth()->id() }}`)
+                .notification((notification) => {
+                    console.log('New notification:', notification);
+                    
+                    // Update badge count
+                    const badge = $('.navbar-badge');
+                    let currentCount = parseInt(badge.text() || 0);
+                    currentCount++;
+                    
+                    if (badge.length) {
+                        badge.text(currentCount).show();
+                    } else {
+                        $('.nav-link .fa-bell').after(`<span class="badge badge-danger navbar-badge" style="font-size: 0.65rem; top: 4px; right: 6px; padding: 2px 4px; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff;">${currentCount}</span>`);
+                    }
+
+                    // Show Toast
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+
+                    Toast.fire({
+                        icon: notification.type === 'overdue_reminder' ? 'warning' : 'info',
+                        title: notification.title,
+                        text: notification.message
+                    });
+                });
+            
+            window.Echo.channel('test-channel')
+                .listen('TestBroadcast', (e) => {
+                    console.log('Test Broadcast received:', e.message);
+                });
+        }
+    @endauth
 </script>
 </body>
 </html>

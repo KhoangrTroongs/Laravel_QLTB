@@ -8,12 +8,12 @@
 @endsection
 
 @section('content')
-<div class="card card-primary card-outline">
-    <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-laptop mr-2"></i>Danh Sách Thiết Bị</h3>
+<div class="card card-primary card-outline shadow-sm" style="border-radius: 12px;">
+    <div class="card-header bg-white">
+        <h3 class="card-title font-weight-bold"><i class="fas fa-laptop mr-2 text-primary"></i>Danh Sách Thiết Bị</h3>
         <div class="card-tools">
-            <a href="{{ route('equipment.create') }}" class="btn btn-primary btn-sm">
-                <i class="fas fa-plus mr-1"></i>Thêm Thiết Bị
+            <a href="{{ route('equipment.create') }}" class="btn btn-primary btn-sm shadow-sm px-3">
+                <i class="fas fa-plus mr-1"></i> Thêm Thiết Bị
             </a>
         </div>
     </div>
@@ -23,9 +23,9 @@
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <div class="input-group shadow-sm">
-                        <input type="text" name="search" class="form-control" placeholder="Tìm kiếm tên, model..." value="{{ request('search') }}">
+                        <input type="text" name="search" class="form-control border-right-0" placeholder="Tìm kiếm tên, model..." value="{{ request('search') }}">
                         <div class="input-group-append">
-                            <button class="btn btn-warning px-3" type="submit"><i class="fas fa-search"></i></button>
+                            <button class="btn btn-warning px-4" type="submit"><i class="fas fa-search"></i></button>
                         </div>
                     </div>
                 </div>
@@ -33,100 +33,122 @@
                     <select name="status" class="form-control shadow-sm" onchange="this.form.submit()">
                         <option value="">-- Tất cả trạng thái --</option>
                         <option value="1" {{ request('status') === '1' ? 'selected' : '' }}>Hoạt động bình thường</option>
-                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Bị hư</option>
+                        <option value="0" {{ request('status') === '0' ? 'selected' : '' }}>Bị hư / Bảo trì</option>
                     </select>
                 </div>
                 <div class="col-md-1">
-                    <a href="{{ route('equipment.index') }}" class="btn btn-default shadow-sm border btn-block btn-input" title="Reset bộ lọc">
+                    <a href="{{ route('equipment.index') }}" class="btn btn-default shadow-sm border btn-block" title="Reset bộ lọc">
                         <i class="fas fa-undo"></i>
                     </a>
                 </div>
             </div>
         </form>
 
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <x-sortable-header field="id" title="#" width="80" class="text-center" />
-                    <x-sortable-header field="name" title="Thiết Bị" />
-                    <x-sortable-header field="model" title="Model & Phân Loại" />
-                    <th class="py-3">
-                        <span class="text-muted font-weight-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
-                            Mô Tả
-                        </span>
-                    </th>
-                    <x-sortable-header field="status" title="Tình Trạng" width="180" />
-                    <th width="120" class="text-center py-3">
-                        <span class="text-muted font-weight-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
-                            Thao Tác
-                        </span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($equipment as $item)
-                <tr>
-                    <td class="text-center text-muted font-weight-bold">{{ $item->id }}</td>
-                    <td>
-                        <div class="d-flex align-items-center">
-                            <div class="mr-3 border rounded overflow-hidden shadow-sm" style="width: 50px; height: 35px; background: #f8f9fa;">
-                                @if($item->image)
-                                    <img src="{{ asset('storage/' . $item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
-                                @else
-                                    <div class="d-flex align-items-center justify-content-center h-100">
-                                        <i class="fas fa-laptop text-muted"></i>
-                                    </div>
-                                @endif
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <x-sortable-header field="id" title="#" width="80" class="text-center" />
+                        <x-sortable-header field="name" title="THIẾT BỊ" />
+                        <x-sortable-header field="model" title="MODEL & LOẠI" />
+                        <th>THÔNG SỐ / MÔ TẢ</th>
+                        <x-sortable-header field="status" title="TÌNH TRẠNG" width="160" />
+                        <x-sortable-header field="availability" title="KHẢ DỤNG" width="160" />
+                        <th width="120" class="text-center">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($equipment as $item)
+                    <tr>
+                        <td class="text-center text-muted small font-weight-bold">{{ $item->id }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="mr-3 border rounded overflow-hidden shadow-xs" style="width: 50px; height: 38px; background: #f8f9fa;">
+                                    @if($item->image)
+                                        <img src="{{ str_starts_with($item->image, 'http') ? $item->image : asset('storage/' . $item->image) }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    @else
+                                        <div class="d-flex align-items-center justify-content-center h-100">
+                                            <i class="fas fa-laptop text-muted opacity-50"></i>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="font-weight-bold text-dark">{{ $item->name }}</div>
                             </div>
-                            <div class="font-weight-bold text-dark">{{ $item->name }}</div>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="badge badge-light border text-dark">{{ $item->model }}</div>
-                    </td>
-                    <td><small class="text-muted">{{ Str::limit($item->description ?? 'Không có mô tả', 50) }}</small></td>
-                    <td>
-                        @if($item->status == 1)
-                            <span class="badge badge-success shadow-sm">
-                                <i class="fas fa-check-circle mr-1"></i>Sẵn sàng sử dụng
+                        </td>
+                        <td>
+                            <div class="small font-weight-bold mb-1">{{ $item->model }}</div>
+                            <span class="badge badge-info shadow-xs" style="font-size: 0.7rem;">
+                                <i class="fas fa-tag mr-1"></i>{{ $item->category->name ?? 'N/A' }}
                             </span>
-                        @else
-                            <span class="badge badge-danger shadow-sm">
-                                <i class="fas fa-tools mr-1"></i>Đang bảo trì/Hư
-                            </span>
-                        @endif
-                    </td>
-                    <td class="text-center">
-                        <div class="btn-group">
-                            <a href="{{ route('equipment.edit', $item) }}" class="btn btn-warning btn-xs shadow-sm me-1" title="Sửa">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('equipment.destroy', $item) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-xs shadow-sm confirm-delete" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                @empty
-                <tr>
-                    <td colspan="6" class="text-center py-5 text-muted">
-                        <i class="fas fa-laptop-code fa-3x mb-3 opacity-25"></i>
-                        <p>Kho thiết bị hiện đang trống.</p>
-                    </td>
-                </tr>
-                @endforelse
-            </tbody>
-        </table>
+                        </td>
+                        <td>
+                            <div class="small text-muted mb-2">{{ Str::limit($item->description ?? 'Không có mô tả', 40) }}</div>
+                            @if($item->spec)
+                                <div class="d-flex flex-wrap" style="gap: 4px;">
+                                    @foreach(array_slice($item->spec, 0, 3) as $key => $val)
+                                        <span class="badge badge-secondary p-1" style="font-size: 0.65rem; font-weight: normal; border-radius: 4px;">
+                                            {{ $key }}: {{ $val }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </td>
+                        <td>
+                            @if($item->status == 1)
+                                <span class="badge badge-success shadow-xs px-2 py-1" style="border-radius: 6px;">
+                                    <i class="fas fa-check-circle mr-1"></i>TỐT
+                                </span>
+                            @else
+                                <span class="badge badge-danger shadow-xs px-2 py-1" style="border-radius: 6px;">
+                                    <i class="fas fa-tools mr-1"></i>HỎNG
+                                </span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($item->status == 1 && $item->active_borrow_count == 0 && $item->available == 1)
+                                <span class="badge badge-primary shadow-xs px-2 py-1" style="border-radius: 6px;">
+                                    <i class="fas fa-handshake mr-1"></i>SẴN SÀNG
+                                </span>
+                            @else
+                                <span class="badge badge-light border text-muted px-2 py-1" style="border-radius: 6px;">
+                                    <i class="fas fa-clock mr-1"></i>ĐANG BẬN
+                                </span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <a href="{{ route('equipment.show', $item) }}" class="btn btn-info btn-xs mr-1 text-white shadow-xs" title="Chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ route('equipment.edit', $item) }}" class="btn btn-warning btn-xs mr-1 shadow-xs" title="Sửa">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ route('equipment.destroy', $item) }}" method="POST" class="d-inline delete-form">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-xs shadow-xs" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x mb-3 text-muted opacity-25"></i>
+                            <p class="text-muted">Không tìm thấy thiết bị nào.</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="card-footer">
+    <div class="card-footer bg-white border-top">
         <div class="d-flex justify-content-between align-items-center">
-            <small class="text-muted">Hiển thị {{ $equipment->firstItem() ?? 0 }} - {{ $equipment->lastItem() ?? 0 }} / {{ $equipment->total() }} bản ghi</small>
+            <small class="text-muted font-weight-bold">Hiển thị {{ $equipment->firstItem() ?? 0 }} - {{ $equipment->lastItem() ?? 0 }} / {{ $equipment->total() }} bản ghi</small>
             {{ $equipment->links() }}
         </div>
     </div>
 </div>
 @endsection
-

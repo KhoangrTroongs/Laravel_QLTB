@@ -164,7 +164,7 @@
                             </thead>
                             <tbody>
                                 @forelse($user->equipments as $equipment)
-                                    <tr>
+                                    <tr id="record-{{ $equipment->pivot->id }}">
                                         <td class="pl-4 py-4">
                                             <div class="d-flex align-items-center">
                                                 <div class="bg-light rounded p-2 mr-3 text-primary" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
@@ -180,13 +180,21 @@
                                             <div class="text-dark small"><i class="far fa-calendar-alt mr-1 text-muted"></i> {{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->format('d/m/Y') }}</div>
                                             <div class="text-muted extra-small">{{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->diffForHumans() }}</div>
                                         </td>
-                                        <td class="py-4 text-center">
-                                            @if($equipment->pivot->status == 1)
-                                                <span class="badge badge-primary px-3 py-2" style="border-radius: 8px; font-weight: 600;">
+                                        <td class="py-4 text-center status-cell">
+                                            @if($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_PENDING)
+                                                <span class="badge badge-warning px-3 py-2" style="border-radius: 8px; font-weight: 600;">
+                                                    <i class="fas fa-spinner fa-spin mr-1"></i> Chờ duyệt
+                                                </span>
+                                            @elseif($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_BORROWING)
+                                                <span class="badge badge-primary px-3 py-2" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #3b82f6, #2563eb);">
                                                     <i class="fas fa-clock mr-1"></i> Đang mượn
                                                 </span>
-                                            @else
-                                                <span class="badge badge-success px-3 py-2" style="border-radius: 8px; font-weight: 600;">
+                                            @elseif($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_REJECTED)
+                                                <span class="badge badge-danger px-3 py-2" style="border-radius: 8px; font-weight: 600;">
+                                                    <i class="fas fa-times-circle mr-1"></i> Từ chối
+                                                </span>
+                                            @elseif($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_RETURNED)
+                                                <span class="badge badge-success px-3 py-2" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #10b981, #059669);">
                                                     <i class="fas fa-check-circle mr-1"></i> Đã trả
                                                 </span>
                                             @endif
@@ -228,6 +236,44 @@
 
 @push('scripts')
 <script>
+$(document).ready(function() {
+    if (typeof window.Echo !== 'undefined') {
+        window.Echo.private('App.Models.User.{{ auth()->id() }}')
+            .notification((notification) => {
+                if (notification.type === 'App\\Notifications\\BorrowRequestResponse') {
+                    const recordId = notification.record_id;
+                    const status = notification.status;
+                    const row = $('#record-' + recordId);
+                    
+                    if (row.length > 0) {
+                        const statusCell = row.find('.status-cell');
+                        let badgeHtml = '';
+                        
+                        // Status constants matching PHP model
+                        const STATUS_BORROWING = 1;
+                        const STATUS_REJECTED = 2;
+                        const STATUS_RETURNED = 3;
+                        
+                        if (status == STATUS_BORROWING) {
+                            badgeHtml = '<span class="badge badge-primary px-3 py-2 animate__animated animate__pulse" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #3b82f6, #2563eb);"><i class="fas fa-clock mr-1"></i> Đang mượn</span>';
+                        } else if (status == STATUS_REJECTED) {
+                            badgeHtml = '<span class="badge badge-danger px-3 py-2 animate__animated animate__shakeX" style="border-radius: 8px; font-weight: 600;"><i class="fas fa-times-circle mr-1"></i> Từ chối</span>';
+                        } else if (status == STATUS_RETURNED) {
+                            badgeHtml = '<span class="badge badge-success px-3 py-2 animate__animated animate__bounceIn" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #10b981, #059669);"><i class="fas fa-check-circle mr-1"></i> Đã trả</span>';
+                        }
+                        
+                        if (badgeHtml) {
+                            statusCell.html(badgeHtml);
+                            // Highlight the updated row
+                            row.css('background-color', '#f0fdf4');
+                            setTimeout(() => { row.css('background-color', 'transparent'); }, 3000);
+                        }
+                    }
+                }
+            });
+    }
+});
+
 function handleFileSelect(input) {
     const fileNameSpan = input.closest('.custom-file-wrapper').querySelector('.file-name');
     

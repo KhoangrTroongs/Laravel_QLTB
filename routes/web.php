@@ -1,23 +1,27 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EquipmentController;
 use App\Http\Controllers\EquipmentUserController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\TrashController;
 use App\Http\Controllers\UserController;
 use App\Models\Equipment;
 use App\Models\EquipmentUser;
 use App\Models\User;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
 // ─── Trang thông báo bị chặn ────────────────────────────────────────────────
 Route::get('/banned', function () {
-    if (!Auth::check() || (!Auth::user()->trashed() && Auth::user()->available != 0)) {
+    if (! Auth::check() || (! Auth::user()->trashed() && Auth::user()->available != 0)) {
         return redirect()->route('home');
     }
+
     return view('banned');
 })->name('banned');
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -43,7 +47,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::put('/', [ProfileController::class, 'update'])->name('update');
-    Route::put('/change-password', [ProfileController::class, 'changePassword'])->name('change-password');
+    Route::get('/change-password', [ProfileController::class, 'changePassword'])->name('change-password');
+
+    // Thông báo
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
 });
 
 // ─── Dashboard & Quản trị (chỉ admin + editor) ───────────────────────────────
@@ -51,31 +61,41 @@ Route::middleware(['auth', 'role:admin,editor'])->group(function () {
     Route::get('/dashboard', function () {
         $userCount = User::count();
         $equipmentCount = Equipment::count();
-        $borrowingCount = EquipmentUser::where('status', 1)->count();
+        $borrowingCount = EquipmentUser::where('status', EquipmentUser::STATUS_BORROWING)->count();
+        $overdueCount = EquipmentUser::where('status', EquipmentUser::STATUS_BORROWING)
+            ->where('hantra', '<', now())->count();
         $latestRecords = EquipmentUser::with([
-            'user' => fn($q) => $q->withTrashed(),
-            'equipment' => fn($q) => $q->withTrashed()
+            'user' => fn ($q) => $q->withTrashed(),
+            'equipment' => fn ($q) => $q->withTrashed(),
         ])->latest()->take(5)->get();
-        $availableEquipmentCount = Equipment::count() - $borrowingCount;
+        $pendingCount = EquipmentUser::where('status', EquipmentUser::STATUS_PENDING)->count();
+        $availableEquipmentCount = Equipment::where('status', 1)->where('available', 1)->count() - $borrowingCount;
 
         return view('dashboard', compact(
             'userCount',
             'equipmentCount',
             'borrowingCount',
+            'overdueCount',
             'latestRecords',
-            'availableEquipmentCount'
+            'availableEquipmentCount',
+            'pendingCount'
         ));
     })->name('dashboard');
 
     Route::resource('equipment', EquipmentController::class);
+    Route::resource('categories', CategoryController::class);
 
     Route::get('equipment-users/report', [EquipmentUserController::class, 'report'])->name('equipment-users.report');
+    Route::get('equipment-users/queue', [EquipmentUserController::class, 'queue'])->name('equipment-users.queue');
+    Route::patch('equipment-users/{equipmentUser}/approve', [EquipmentUserController::class, 'approve'])->name('equipment-users.approve');
+    Route::patch('equipment-users/{equipmentUser}/reject', [EquipmentUserController::class, 'reject'])->name('equipment-users.reject');
+    Route::patch('equipment-users/{equipmentUser}/return', [EquipmentUserController::class, 'return'])->name('equipment-users.return');
     Route::resource('equipment-users', EquipmentUserController::class);
 
     // Thùng rác
-    Route::get('/trash', [\App\Http\Controllers\TrashController::class, 'index'])->name('trash.index');
-    Route::post('/trash/user/{id}/restore', [\App\Http\Controllers\TrashController::class, 'restoreUser'])->name('trash.user.restore');
-    Route::post('/trash/equipment/{id}/restore', [\App\Http\Controllers\TrashController::class, 'restoreEquipment'])->name('trash.equipment.restore');
+    Route::get('/trash', [TrashController::class, 'index'])->name('trash.index');
+    Route::post('/trash/user/{id}/restore', [TrashController::class, 'restoreUser'])->name('trash.user.restore');
+    Route::post('/trash/equipment/{id}/restore', [TrashController::class, 'restoreEquipment'])->name('trash.equipment.restore');
 });
 
 // ─── Quản lý nhân viên & vai trò (chỉ admin) ─────────────────────────────────

@@ -106,12 +106,15 @@
                     </td>
                     <td class="text-center">
                         <div class="btn-group">
-                            <a href="{{ route('users.edit', $user) }}" class="btn btn-warning btn-xs shadow-sm" title="Chỉnh sửa">
+                            <a href="{{ route('users.show', $user) }}" class="btn btn-info btn-xs mr-1 text-white" title="Chi tiết">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ route('users.edit', $user) }}" class="btn btn-warning btn-xs mr-1" title="Chỉnh sửa">
                                 <i class="fas fa-edit"></i>
                             </a>
                             <form action="{{ route('users.destroy', $user) }}" method="POST" class="d-inline delete-form ml-1">
                                 @csrf @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-xs shadow-sm confirm-delete" title="Xóa bỏ">
+                                <button type="button" class="btn btn-danger btn-xs confirm-delete" title="Xóa bỏ">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

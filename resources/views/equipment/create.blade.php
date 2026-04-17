@@ -10,103 +10,146 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-8">
-        <div class="card card-primary card-outline">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-plus-circle mr-2"></i>Form Thêm Thiết Bị</h3>
+    <div class="col-md-9">
+        <div class="card card-primary card-outline shadow-sm" style="border-radius: 12px;">
+            <div class="card-header bg-white">
+                <h3 class="card-title font-weight-bold"><i class="fas fa-plus-circle mr-2 text-primary"></i>Thông tin thiết bị</h3>
             </div>
             <form action="{{ route('equipment.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="card-body">
-                    <div class="text-center mb-4">
-                        <div class="position-relative d-inline-block">
-                            <img id="image-preview" src="https://via.placeholder.com/150?text=Equipment" 
-                                 class="shadow border rounded" style="width: 150px; height: 100px; object-fit: cover;">
-                            <label for="image" class="position-absolute btn btn-xs btn-primary rounded-circle" style="bottom: -10px; right: -10px; width: 30px; height: 30px; padding-top: 5px;">
-                                <i class="fas fa-camera"></i>
-                            </label>
-                            <input type="file" name="image" id="image" class="d-none" accept="image/*" onchange="previewEquipmentImage(this)">
+                    <div class="row">
+                        <div class="col-md-4 text-center border-right">
+                            <div class="position-relative d-inline-block mt-4">
+                                <img id="image-preview" src="https://via.placeholder.com/200?text=Hình+ảnh" 
+                                     class="shadow-sm border rounded" style="width: 200px; height: 150px; object-fit: cover;">
+                                <label for="image" class="position-absolute btn btn-sm btn-primary rounded-circle shadow" 
+                                       style="bottom: -10px; right: -10px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-camera"></i>
+                                </label>
+                                <input type="file" name="image" id="image" class="d-none" accept="image/*" onchange="previewEquipmentImage(this)">
+                            </div>
+                            <p class="small text-muted mt-3">Tải lên hình ảnh minh họa thiết bị</p>
                         </div>
-                        <div class="small text-muted mt-2">Hình ảnh thiết bị</div>
-                        @error('image') <div class="text-danger small">{{ $message }}</div> @enderror
+
+                        <div class="col-md-8">
+                            <div class="form-group mb-3">
+                                <label class="text-muted small font-weight-bold text-uppercase">Tên thiết bị <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
+                                       value="{{ old('name') }}" placeholder="VD: MacBook Pro 14 inch, Dell UltraSharp...">
+                                @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="text-muted small font-weight-bold text-uppercase">Model / Mã SP <span class="text-danger">*</span></label>
+                                        <input type="text" name="model" class="form-control @error('model') is-invalid @enderror" 
+                                               value="{{ old('model') }}" placeholder="VD: MKGP3LL/A...">
+                                        @error('model') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="text-muted small font-weight-bold text-uppercase">Loại thiết bị <span class="text-danger">*</span></label>
+                                        <select name="category_id" id="category_id" class="form-control @error('category_id') is-invalid @enderror">
+                                            <option value="">-- Chọn loại --</option>
+                                            @foreach($categories as $cat)
+                                                <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="text-muted small font-weight-bold text-uppercase">Tình trạng</label>
+                                <select name="status" class="form-control">
+                                    <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Sẵn sàng sử dụng</option>
+                                    <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Đang bảo trì/Hư hỏng</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                <label class="text-muted small font-weight-bold text-uppercase">Mô tả thêm</label>
+                                <textarea name="description" class="form-control" rows="2" placeholder="Nhập ghi chú hoặc mô tả sơ lược...">{{ old('description') }}</textarea>
+                            </div>
+                        </div>
                     </div>
 
-                    @if($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
+                    <div id="specs-section" class="mt-4 pt-3 border-top" style="display: none;">
+                        <h5 class="text-primary font-weight-bold mb-3"><i class="fas fa-microchip mr-2"></i>Thông số kỹ thuật</h5>
+                        <div id="dynamic-specs-container" class="row">
+                            <!-- JS will inject fields here -->
                         </div>
-                    @endif
-
-                    <div class="form-group">
-                        <label for="name" class="text-muted small font-weight-bold">TÊN THIẾT BỊ <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-laptop text-primary"></i></span></div>
-                            <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror border-left-0"
-                                   value="{{ old('name') }}" placeholder="VD: iPhone 15, Laptop Dell, Màn hình LG...">
-                        </div>
-                        @error('name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="model" class="text-muted small font-weight-bold">MODEL / MÃ SẢN PHẨM <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-barcode text-primary"></i></span></div>
-                            <input type="text" name="model" id="model" class="form-control @error('model') is-invalid @enderror border-left-0"
-                                   value="{{ old('model') }}" placeholder="VD: A2847, XPS 15, 27UK850-W...">
-                        </div>
-                        @error('model') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="description" class="text-muted small font-weight-bold">THÔNG TIN MÔ TẢ</label>
-                        <textarea name="description" id="description" class="form-control @error('description') is-invalid @enderror"
-                                  rows="3" placeholder="Mô tả thêm về thiết bị...">{{ old('description') }}</textarea>
-                        @error('description') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="status" class="text-muted small font-weight-bold">TÌNH TRẠNG THIẾT BỊ <span class="text-danger">*</span></label>
-                        <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
-                            <option value="1" {{ old('status', '1') == '1' ? 'selected' : '' }}>Sẵn sàng sử dụng</option>
-                            <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Đang bảo trì/Hư hỏng</option>
-                        </select>
-                        @error('status') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                     </div>
                 </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save mr-1"></i>Lưu Thiết Bị
-                    </button>
-                    <a href="{{ route('equipment.index') }}" class="btn btn-default ml-2">
-                        <i class="fas fa-arrow-left mr-1"></i>Quay Lại
+
+                <div class="card-footer bg-white border-top d-flex justify-content-between">
+                    <a href="{{ route('equipment.index') }}" class="btn btn-default">
+                        <i class="fas fa-arrow-left mr-1"></i> Quay lại
                     </a>
+                    <button type="submit" class="btn btn-primary px-5 shadow-sm font-weight-bold">
+                        <i class="fas fa-save mr-1"></i> Lưu thiết bị
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card card-info card-outline">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-info-circle mr-2"></i>Hướng Dẫn</h3>
-            </div>
-            <div class="card-body">
-                <p><strong>Tên Thiết Bị:</strong> Tên đầy đủ của thiết bị (laptop, cáp sạc, màn hình, điện thoại...)</p>
-                <p><strong>Model:</strong> Mã model của thiết bị từ nhà sản xuất.</p>
-                <p><strong>Trạng Thái:</strong></p>
-                <ul>
-                    <li><span class="badge badge-success">Hoạt động bình thường</span> - Thiết bị đang hoạt động tốt</li>
-                    <li><span class="badge badge-danger">Bị hư</span> - Thiết bị cần sửa chữa</li>
-                </ul>
+
+    <div class="col-md-3">
+        <div class="card card-info card-outline shadow-sm">
+            <div class="card-header"><h3 class="card-title font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Hướng dẫn</h3></div>
+            <div class="card-body small">
+                <p class="mb-2"><strong>Thông số kỹ thuật:</strong> Khi bạn chọn một <strong>Loại thiết bị</strong>, các ô nhập liệu tương ứng sẽ xuất hiện.</p>
+                <p class="text-muted italic">Các thông số này được Admin định nghĩa trong menu "Loại Thiết Bị".</p>
             </div>
         </div>
     </div>
 </div>
+@endsection
+
 @push('scripts')
 <script>
+    // Data injection from Blade to JS
+    const categoriesSpecs = @json($categories->pluck('specs', 'id'));
+
+    $(document).ready(function() {
+        $('#category_id').change(function() {
+            const categoryId = $(this).val();
+            const container = $('#dynamic-specs-container');
+            const section = $('#specs-section');
+            
+            container.empty();
+            
+            if (categoryId && categoriesSpecs[categoryId] && categoriesSpecs[categoryId].length > 0) {
+                const specs = categoriesSpecs[categoryId];
+                
+                specs.forEach(specName => {
+                    const html = `
+                        <div class="col-md-6 mb-3 animate__animated animate__fadeIn">
+                            <div class="form-group mb-0">
+                                <label class="text-muted small font-weight-bold text-uppercase">${specName}</label>
+                                <input type="text" name="specs[${specName}]" class="form-control" placeholder="Nhập ${specName}...">
+                            </div>
+                        </div>
+                    `;
+                    container.append(html);
+                });
+                
+                section.slideDown();
+            } else {
+                section.slideUp();
+            }
+        });
+
+        // Trigger change if editing or validation fails
+        if ($('#category_id').val()) {
+            $('#category_id').change();
+        }
+    });
+
     function previewEquipmentImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();
@@ -116,5 +159,3 @@
     }
 </script>
 @endpush
-@endsection
-

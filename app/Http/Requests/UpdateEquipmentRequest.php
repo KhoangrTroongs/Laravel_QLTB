@@ -23,19 +23,22 @@ class UpdateEquipmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => 'required|string|max:255',
-            'model'       => 'required|string|max:255',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'name' => 'required|string|max:255',
+            'model' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'description' => 'nullable|string|max:1000',
-            'status'      => 'required|boolean',
+            'status' => 'required|boolean',
+            'spec' => 'nullable|array',
+            'specs' => 'nullable|array',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'name.required'   => 'Tên thiết bị không được để trống.',
-            'model.required'  => 'Model không được để trống.',
+            'name.required' => 'Tên thiết bị không được để trống.',
+            'model.required' => 'Model không được để trống.',
             'status.required' => 'Trạng thái không được để trống.',
         ];
     }

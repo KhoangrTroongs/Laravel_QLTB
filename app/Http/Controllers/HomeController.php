@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\EquipmentUser;
+use App\Models\User;
+use App\Notifications\NewBorrowRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
 class HomeController extends Controller
@@ -17,11 +22,11 @@ class HomeController extends Controller
      */
     public function index(Request $request): View
     {
-        $query = Equipment::query()->where('status', 1)->where('available', 1);
+        $query = Equipment::with('category')->where('status', 1)->where('available', 1);
 
-        // Loại bỏ thiết bị đang được mượn (có phiếu mượn status=1)
+        // Loại bỏ thiết bị đang được mượn (có phiếu mượn status=BORROWING)
         $query->whereDoesntHave('users', function ($q) {
-            $q->where('equipment_users.status', 1);
+            $q->where('equipment_users.status', EquipmentUser::STATUS_BORROWING);
         });
 
         if ($request->filled('search')) {
@@ -31,9 +36,14 @@ class HomeController extends Controller
             });
         }
 
-        $availableEquipment = $query->latest()->paginate(12)->withQueryString();
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
 
-        return view('home.index', compact('availableEquipment'));
+        $availableEquipment = $query->latest()->paginate(12)->withQueryString();
+        $categories = Category::all();
+
+        return view('home.index', compact('availableEquipment', 'categories'));
     }
 
     /**
@@ -45,11 +55,11 @@ class HomeController extends Controller
             abort(404);
         }
         $equipment->loadMissing(['users' => function ($q) {
-            $q->where('equipment_users.status', 1);
+            $q->where('equipment_users.status', EquipmentUser::STATUS_BORROWING);
         }]);
 
         $isAvailable = $equipment->status == 1
-            && ! $equipment->users->where('pivot.status', 1)->count();
+            && ! $equipment->users->where('pivot.status', EquipmentUser::STATUS_BORROWING)->count();
 
         return view('home.show', compact('equipment', 'isAvailable'));
     }
@@ -61,7 +71,7 @@ class HomeController extends Controller
     {
         // Kiểm tra thiết bị có thể mượn không
         $isBorrowed = EquipmentUser::where('equipment_id', $equipment->id)
-            ->where('status', 1)->exists();
+            ->where('status', EquipmentUser::STATUS_BORROWING)->exists();
 
         if ($equipment->status != 1 || $isBorrowed || $equipment->available == 0) {
             return redirect()->route('home')->with('error', 'Thiết bị này hiện không thể mượn.');
@@ -77,11 +87,12 @@ class HomeController extends Controller
     {
         $validated = $request->validate([
             'description' => ['nullable', 'string', 'max:500'],
+            'hantra' => ['nullable', 'date', 'after_or_equal:today'],
         ]);
 
         // Kiểm tra lại trước khi lưu
         $isBorrowed = EquipmentUser::where('equipment_id', $equipment->id)
-            ->where('status', 1)->exists();
+            ->where('status', EquipmentUser::STATUS_BORROWING)->exists();
 
         if ($equipment->status != 1 || $isBorrowed) {
             return redirect()->route('home')->with('error', 'Thiết bị này hiện không thể mượn.');
@@ -90,21 +101,29 @@ class HomeController extends Controller
         // Kiểm tra user đang mượn thiết bị này chưa
         $alreadyBorrowing = EquipmentUser::where('user_id', Auth::id())
             ->where('equipment_id', $equipment->id)
-            ->where('status', 1)
+            ->whereIn('status', [EquipmentUser::STATUS_PENDING, EquipmentUser::STATUS_BORROWING])
             ->exists();
 
         if ($alreadyBorrowing) {
-            return back()->with('error', 'Bạn đang mượn thiết bị này rồi!');
+            return back()->with('error', 'Bạn đã có một yêu cầu mượn hoặc đang mượn thiết bị này rồi!');
         }
 
-        EquipmentUser::create([
+        $borrowRecord = EquipmentUser::create([
             'user_id' => Auth::id(),
             'equipment_id' => $equipment->id,
             'ngaymuon' => now(),
-            'status' => 1,
-            'description' => $validated['description'] ?? null,
+            'hantra' => $request->hantra,
+            'status' => EquipmentUser::STATUS_PENDING,
+            'description' => $request->description,
         ]);
 
-        return redirect()->route('home')->with('success', 'Tạo phiếu mượn thành công! Chúc bạn sử dụng tốt.');
+        // Thông báo cho tất cả Admin
+        $admins = User::whereHas('roles', fn ($q) => $q->where('name', 'admin'))->get();
+        Log::info('Sending NewBorrowRequest to '.$admins->count().' admins');
+        Notification::send($admins, new NewBorrowRequest($borrowRecord));
+        Log::info('NewBorrowRequest sent');
+
+        return redirect()->route('profile.show')
+            ->with('success', 'Yêu cầu mượn thiết bị của bạn đã được gửi. Vui lòng chờ quản trị viên phê duyệt!');
     }
 }

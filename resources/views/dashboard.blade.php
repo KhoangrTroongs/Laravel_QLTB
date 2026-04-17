@@ -4,6 +4,23 @@
 @section('page-title', 'Tổng Quan Hệ Thống')
 
 @section('content')
+@if($pendingCount > 0)
+<div class="alert alert-info alert-dismissible fade show shadow-sm border-0 mb-4" role="alert" style="border-radius: 12px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0369a1;">
+    <div class="d-flex align-items-center">
+        <div class="mr-3" style="font-size: 1.5rem;">
+            <i class="fas fa-bell animate__animated animate__swing animate__infinite"></i>
+        </div>
+        <div>
+            <span class="font-weight-bold">Thông báo yêu cầu mới!</span> Có <strong>{{ $pendingCount }}</strong> yêu cầu mượn thiết bị đang chờ bạn phê duyệt.
+            <a href="{{ route('equipment-users.index', ['status' => 0]) }}" class="ml-2 font-weight-bold text-primary" style="text-decoration: underline;">Xem và duyệt ngay &rarr;</a>
+        </div>
+    </div>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+@endif
+
 <!-- KPI Row -->
 <div class="row">
     <div class="col-lg-3 col-6">
@@ -45,13 +62,13 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-danger shadow">
             <div class="inner">
-                <h3>Phân Tích</h3>
-                <p>Xem Báo Cáo</p>
+                <h3>{{ $overdueCount }}</h3>
+                <p>Yêu Cầu Trễ Hạn</p>
             </div>
             <div class="icon">
-                <i class="fas fa-chart-pie"></i>
+                <i class="fas fa-exclamation-circle"></i>
             </div>
-            <a href="{{ route('equipment-users.report') }}" class="small-box-footer"> Xem báo cáo <i class="fas fa-arrow-circle-right"></i></a>
+            <a href="{{ route('equipment-users.index', ['overdue' => 1]) }}" class="small-box-footer"> Chi tiết <i class="fas fa-arrow-circle-right"></i></a>
         </div>
     </div>
 </div>
@@ -114,9 +131,13 @@
                                 </td>
                                 <td>{{ \Carbon\Carbon::parse($record->ngaymuon)->diffForHumans() }}</td>
                                 <td>
-                                    @if($record->status == 1)
+                                    @if($record->status == \App\Models\EquipmentUser::STATUS_PENDING)
+                                        <span class="badge badge-info px-2 py-1">Chờ duyệt</span>
+                                    @elseif($record->status == \App\Models\EquipmentUser::STATUS_BORROWING)
                                         <span class="badge bg-warning-gradient px-2 py-1" style="background: linear-gradient(45deg, #f39c12, #f1c40f); color: #fff;">Đang mượn</span>
-                                    @else
+                                    @elseif($record->status == \App\Models\EquipmentUser::STATUS_REJECTED)
+                                        <span class="badge badge-danger px-2 py-1">Từ chối</span>
+                                    @elseif($record->status == \App\Models\EquipmentUser::STATUS_RETURNED)
                                         <span class="badge bg-success-gradient px-2 py-1" style="background: linear-gradient(45deg, #27ae60, #2ecc71); color: #fff;">Đã trả</span>
                                     @endif
                                 </td>
@@ -194,10 +215,54 @@
     </div>
 </div>
 
-<style>
-    .bg-primary-gradient { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); }
-    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .btn-app:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.1) !important; color: #1e3c72; }
-    .table-valign-middle td { vertical-align: middle !important; }
-</style>
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        if (typeof window.Echo !== 'undefined') {
+            window.Echo.private('App.Models.User.{{ auth()->id() }}')
+                .notification((notification) => {
+                    if (notification.type === 'App\\Notifications\\NewBorrowRequest') {
+                        // 1. Update Alert box if it exists, or create it
+                        let alertBox = $('.alert-info');
+                        if (alertBox.length > 0) {
+                            let countElement = alertBox.find('strong');
+                            let currentCount = parseInt(countElement.text());
+                            countElement.text(currentCount + 1);
+                        } else {
+                            // Optionally create alert box dynamically
+                            location.reload(); // Simplest way to show the new alert if it didn't exist
+                        }
+
+                        // 2. Prepend to Latest Activity table
+                        let tableBody = $('.table-valign-middle tbody');
+                        let newRow = `
+                            <tr class="animate__animated animate__fadeInDown" style="background-color: #f0f9ff;">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(notification.user_name)}&size=30" 
+                                             class="rounded-circle mr-2 border shadow-xs">
+                                        <span>${notification.user_name}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-primary font-weight-bold">${notification.equipment_name}</span>
+                                </td>
+                                <td>vừa xong</td>
+                                <td>
+                                    <span class="badge badge-info px-2 py-1">Chờ duyệt</span>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.prepend(newRow);
+                        
+                        // Limit table to 10 rows
+                        if (tableBody.find('tr').length > 10) {
+                            tableBody.find('tr:last').remove();
+                        }
+                    }
+                });
+        }
+    });
+</script>
+@endpush
 @endsection

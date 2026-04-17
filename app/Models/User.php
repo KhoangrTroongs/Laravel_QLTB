@@ -57,7 +57,7 @@ class User extends Authenticatable
     public function equipments(): BelongsToMany
     {
         return $this->belongsToMany(Equipment::class, 'equipment_users')
-            ->withPivot('ngaymuon', 'status', 'description')
+            ->withPivot('id', 'ngaymuon', 'hantra', 'ngaytra', 'status', 'description')
             ->withTimestamps();
     }
 

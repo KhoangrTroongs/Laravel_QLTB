@@ -14,6 +14,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Compiled Assets -->
+    <script>
+        window.Laravel = {
+            csrfToken: '{{ csrf_token() }}',
+            userId: {{ auth()->check() ? auth()->id() : 'null' }}
+        };
+    </script>
+    @vite(['resources/js/app.js'])
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -237,17 +245,80 @@
             </ul>
             <div class="navbar-nav">
                 @auth
+                    <!-- Notifications -->
+                    <div class="nav-item dropdown mr-3 border-right pr-3">
+                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="notifDropdown"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="position: relative; padding: 10px;">
+                            <i class="far fa-bell" style="font-size: 1.5rem; color: rgba(255,255,255,0.9);"></i>
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                                <span class="badge badge-danger" style="font-size: 0.6rem; position: absolute; top: 6px; right: 2px; padding: 2px 4px; border-radius: 50%; min-width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 2px solid #0f172a;">
+                                    {{ auth()->user()->unreadNotifications->count() }}
+                                </span>
+                            @endif
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right border-0 shadow-lg mt-3" style="border-radius: 15px; overflow: hidden; min-width: 320px;">
+                            <div class="dropdown-header text-center py-3 bg-light border-bottom">
+                                <span class="text-dark font-weight-bold" style="font-size: 0.95rem;">
+                                    Thông báo mới ({{ auth()->user()->unreadNotifications->count() }})
+                                </span>
+                            </div>
+                            <div style="max-height: 350px; overflow-y: auto;">
+                                @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
+                                    @php
+                                        $type = $notification->data['type'] ?? 'default';
+                                        $bgClass = match($type) {
+                                            'overdue_reminder' => 'danger',
+                                            'new_request' => 'info',
+                                            'request_response' => 'success',
+                                            default => 'secondary'
+                                        };
+                                        $iconClass = match($type) {
+                                            'overdue_reminder' => 'fa-exclamation-triangle',
+                                            'new_request' => 'fa-envelope',
+                                            'request_response' => 'fa-check-circle',
+                                            default => 'fa-info-circle'
+                                        };
+                                    @endphp
+                                    <form action="{{ route('profile.notifications.markAsRead', $notification->id) }}" method="POST" id="public-notif-{{ $notification->id }}">
+                                        @csrf
+                                        <a href="javascript:void(0)" onclick="document.getElementById('public-notif-{{ $notification->id }}').submit();" class="dropdown-item py-3 border-bottom">
+                                            <div class="media align-items-center">
+                                                <div class="bg-{{ $bgClass }} rounded-circle p-2 mr-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; flex-shrink: 0;">
+                                                    <i class="fas {{ $iconClass }} text-white" style="font-size: 0.9rem;"></i>
+                                                </div>
+                                                <div class="media-body" style="white-space: normal;">
+                                                    <p class="mb-0 font-weight-bold text-dark small">{{ $notification->data['title'] }}</p>
+                                                    <p class="mb-0 text-muted extra-small">{{ Str::limit($notification->data['message'], 55) }}</p>
+                                                    <small class="text-primary font-weight-bold">{{ $notification->created_at->diffForHumans() }}</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </form>
+                                @empty
+                                    <div class="dropdown-item text-center py-5 text-muted">
+                                        <i class="fas fa-check-circle fa-2x mb-2 opacity-25"></i>
+                                        <p class="mb-0">Không có thông báo mới.</p>
+                                    </div>
+                                @endforelse
+                            </div>
+                            <a href="{{ route('profile.notifications.index') }}" class="dropdown-item dropdown-footer font-weight-bold py-2 bg-light text-center text-primary">Xem tất cả</a>
+                        </div>
+                    </div>
+
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             @if(Auth::user()->avatar)
-                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
-                                     class="btn-avatar mr-2" alt="Avatar">
+                                @php
+                                    $userAvatarUrl = str_starts_with(Auth::user()->avatar, 'http') ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar);
+                                @endphp
+                                <img src="{{ $userAvatarUrl }}"
+                                     class="btn-avatar mr-2 shadow-sm" alt="Avatar">
                             @else
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=3b82f6&color=fff"
-                                     class="btn-avatar mr-2" alt="Avatar">
+                                     class="btn-avatar mr-2 shadow-sm" alt="Avatar">
                             @endif
-                            <span class="text-white">{{ Auth::user()->name }}</span>
+                            <span class="text-white font-weight-bold">{{ Auth::user()->name }}</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
                             <a class="dropdown-item" href="{{ route('profile.show') }}">
@@ -309,6 +380,42 @@
             Toast.fire({ icon: 'error', title: '{{ session('error') }}' });
         @endif
     });
+
+    // Real-time Notifications with Echo
+    @auth
+        if (typeof window.Echo !== 'undefined') {
+            window.Echo.private(`App.Models.User.{{ auth()->id() }}`)
+                .notification((notification) => {
+                    console.log('New notification:', notification);
+                    
+                    // Update badge count
+                    const badge = $('#notifDropdown .badge');
+                    let currentCount = parseInt(badge.text() || 0);
+                    currentCount++;
+                    
+                    if (badge.length) {
+                        badge.text(currentCount).show();
+                    } else {
+                        $('#notifDropdown').append(`<span class="badge badge-danger" style="font-size: 0.6rem; position: absolute; top: 6px; right: 2px; padding: 2px 4px; border-radius: 50%; min-width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; border: 2px solid #0f172a;">${currentCount}</span>`);
+                    }
+
+                    // Show Toast
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true
+                    });
+
+                    Toast.fire({
+                        icon: notification.type === 'overdue_reminder' ? 'warning' : 'info',
+                        title: notification.title,
+                        text: notification.message
+                    });
+                });
+        }
+    @endauth
 </script>
 @stack('scripts')
 </body>
