@@ -31,50 +31,67 @@
                 @enderror
             </div>
 
-            <div class="form-group">
-                <label class="font-weight-bold text-muted small">EMAIL *</label>
-                <input type="email" name="email" value="{{ old('email') }}"
-                       class="form-control form-control-auth @error('email') is-invalid @enderror"
-                       placeholder="your@email.com" required>
-                @error('email')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted small">EMAIL *</label>
+                        <input type="email" name="email" value="{{ old('email') }}"
+                               class="form-control form-control-auth @error('email') is-invalid @enderror"
+                               placeholder="your@email.com" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted small">SỐ ĐIỆN THOẠI</label>
+                        <input type="text" name="phone" value="{{ old('phone') }}"
+                               class="form-control form-control-auth @error('phone') is-invalid @enderror"
+                               placeholder="0912 345 678">
+                        @error('phone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="font-weight-bold text-muted small">SỐ ĐIỆN THOẠI</label>
-                <input type="text" name="phone" value="{{ old('phone') }}"
-                       class="form-control form-control-auth @error('phone') is-invalid @enderror"
-                       placeholder="0912 345 678">
-                @error('phone')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted small">MẬT KHẨU *</label>
+                        <div class="input-group-auth">
+                            <input type="password" name="password" id="password"
+                                   class="form-control form-control-auth @error('password') is-invalid @enderror"
+                                   placeholder="Tối thiểu 6 ký tự" required>
+                            <button type="button" class="btn-toggle-pwd" id="toggleP"
+                                    onclick="toggleP()">
+                                <i class="fas fa-eye" id="eyeI"></i>
+                            </button>
+                        </div>
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="font-weight-bold text-muted small">XÁC NHẬN MẬT KHẨU *</label>
+                        <div class="input-group-auth">
+                            <input type="password" name="password_confirmation" id="password_confirmation"
+                                   class="form-control form-control-auth"
+                                   placeholder="Lại mật khẩu" required>
+                            <button type="button" class="btn-toggle-pwd" id="togglePC"
+                                    onclick="togglePC()">
+                                <i class="fas fa-eye" id="eyeIC"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label class="font-weight-bold text-muted small">MẬT KHẨU *</label>
-                <input type="password" name="password"
-                       class="form-control form-control-auth @error('password') is-invalid @enderror"
-                       placeholder="Tối thiểu 6 ký tự" required>
-                @error('password')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label class="font-weight-bold text-muted small">XÁC NHẬN MẬT KHẨU *</label>
-                <input type="password" name="password_confirmation"
-                       class="form-control form-control-auth"
-                       placeholder="Nhập lại mật khẩu" required>
-            </div>
-
-            <div class="alert alert-info py-2 rounded-lg">
-                <i class="fas fa-info-circle mr-1"></i>
-                <small>Tài khoản mới sẽ có vai trò <strong>User</strong> mặc định.</small>
-            </div>
-
-            <button type="submit" class="btn btn-success btn-auth mt-2 mb-3">
-                <i class="fas fa-user-plus mr-2"></i> Đăng Ký Tài Khoản
+            <button type="submit" class="btn btn-success btn-auth mb-3">
+                <i class="fas fa-user-plus mr-2"></i> Đăng Ký Ngay
             </button>
         </form>
 
@@ -92,3 +109,30 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function toggleP() {
+    const pwd = document.getElementById('password');
+    const icon = document.getElementById('eyeI');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        pwd.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+function togglePC() {
+    const pwd = document.getElementById('password_confirmation');
+    const icon = document.getElementById('eyeIC');
+    if (pwd.type === 'password') {
+        pwd.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        pwd.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+</script>
+@endpush

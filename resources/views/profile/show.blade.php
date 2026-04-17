@@ -106,17 +106,32 @@
                         @csrf @method('PUT')
                         <div class="form-group mb-2">
                             <label class="font-weight-bold text-muted extra-small">MẬT KHẨU CŨ</label>
-                            <input type="password" name="current_password" class="form-control form-control-sm" style="border-radius: 8px;">
+                            <div class="input-group-auth">
+                                <input type="password" name="current_password" id="p_cur" class="form-control form-control-sm">
+                                <button class="btn-toggle-pwd" type="button" onclick="tgl('p_cur', 'i_cur')">
+                                    <i class="fas fa-eye" id="i_cur"></i>
+                                </button>
+                            </div>
                             @error('current_password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
                         <div class="form-group mb-2">
                             <label class="font-weight-bold text-muted extra-small">MẬT KHẨU MỚI</label>
-                            <input type="password" name="password" class="form-control form-control-sm" style="border-radius: 8px;">
+                            <div class="input-group-auth">
+                                <input type="password" name="password" id="p_new" class="form-control form-control-sm">
+                                <button class="btn-toggle-pwd" type="button" onclick="tgl('p_new', 'i_new')">
+                                    <i class="fas fa-eye" id="i_new"></i>
+                                </button>
+                            </div>
                             @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
                         <div class="form-group mb-3">
                             <label class="font-weight-bold text-muted extra-small">XÁC NHẬN MỚI</label>
-                            <input type="password" name="password_confirmation" class="form-control form-control-sm" style="border-radius: 8px;">
+                            <div class="input-group-auth">
+                                <input type="password" name="password_confirmation" id="p_conf" class="form-control form-control-sm">
+                                <button class="btn-toggle-pwd" type="button" onclick="tgl('p_conf', 'i_conf')">
+                                    <i class="fas fa-eye" id="i_conf"></i>
+                                </button>
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-warning btn-block btn-sm py-2" style="border-radius: 8px; font-weight: 700;">
                             <i class="fas fa-lock mr-1"></i> Đổi Mật Khẩu
@@ -238,6 +253,18 @@ function handleFileSelect(input) {
         fileNameSpan.textContent = 'Bấm để chọn ảnh...';
         fileNameSpan.classList.remove('text-primary', 'font-weight-bold');
         fileNameSpan.classList.add('text-muted');
+    }
+}
+
+function tgl(id, iconId) {
+    const p = document.getElementById(id);
+    const i = document.getElementById(iconId);
+    if (p.type === 'password') {
+        p.type = 'text';
+        i.className = 'fas fa-eye-slash';
+    } else {
+        p.type = 'password';
+        i.className = 'fas fa-eye';
     }
 }
 </script>

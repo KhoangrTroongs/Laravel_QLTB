@@ -174,6 +174,38 @@
             padding: 3rem 0;
             margin-top: 5rem;
         }
+
+        /* Unified Input Group for Password Toggle */
+        .input-group-auth {
+            display: flex;
+            align-items: stretch;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s;
+            background: #fff;
+            overflow: hidden;
+        }
+        .input-group-auth:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+        .input-group-auth .form-control, .input-group-auth .form-control-auth {
+            border: none !important;
+            flex: 1;
+            box-shadow: none !important;
+        }
+        .input-group-auth .btn-toggle-pwd {
+            border: none !important;
+            background: transparent !important;
+            color: #94a3b8;
+            padding: 0 1rem;
+            transition: color 0.2s;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .input-group-auth .btn-toggle-pwd:hover {
+            color: #3b82f6;
+        }
     </style>
     @stack('styles')
 </head>
@@ -189,19 +221,22 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
+                @if(Auth::check() && Auth::user()->hasAnyRole(['admin', 'editor']))
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('dashboard') }}">
+                        <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
+                    </a>
+                </li>
+                @else
                 <li class="nav-item">
                     <a class="nav-link" href="{{ route('home') }}">
                         <i class="fas fa-home mr-1"></i> Trang Chủ
                     </a>
                 </li>
+                @endif
             </ul>
             <div class="navbar-nav">
                 @auth
-                    @if(Auth::user()->hasAnyRole(['admin', 'editor']))
-                        <a href="{{ route('dashboard') }}" class="nav-link">
-                            <i class="fas fa-tachometer-alt mr-1"></i> Dashboard
-                        </a>
-                    @endif
                     <div class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

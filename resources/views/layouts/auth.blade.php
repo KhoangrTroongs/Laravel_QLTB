@@ -74,6 +74,38 @@
         }
         .auth-divider::before { left: 0; }
         .auth-divider::after { right: 0; }
+
+        /* Unified Input Group for Password Toggle */
+        .input-group-auth {
+            display: flex;
+            align-items: stretch;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.2s;
+            background: #fff;
+            overflow: hidden;
+        }
+        .input-group-auth:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 4px rgba(59,130,246,0.1);
+        }
+        .input-group-auth .form-control-auth {
+            border: none !important;
+            flex: 1;
+            box-shadow: none !important;
+        }
+        .input-group-auth .btn-toggle-pwd {
+            border: none !important;
+            background: transparent !important;
+            color: #94a3b8;
+            padding: 0 1rem;
+            transition: color 0.2s;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .input-group-auth .btn-toggle-pwd:hover {
+            color: #3b82f6;
+        }
     </style>
 </head>
 <body class="hold-transition">
@@ -103,5 +135,6 @@
         @endif
     });
 </script>
+@stack('scripts')
 </body>
 </html>

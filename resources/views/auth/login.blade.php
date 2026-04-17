@@ -30,17 +30,14 @@
 
             <div class="form-group">
                 <label class="font-weight-bold text-muted small">MẬT KHẨU</label>
-                <div class="input-group" style="background: none; border: none;">
+                <div class="input-group-auth">
                     <input type="password" name="password" id="password"
                            class="form-control form-control-auth @error('password') is-invalid @enderror"
                            placeholder="••••••••" required>
-                    <div class="input-group-append">
-                        <button type="button" class="btn btn-outline-secondary" id="togglePwd"
-                                style="border-radius: 0 12px 12px 0; border-left: none;"
-                                onclick="togglePassword()">
-                            <i class="fas fa-eye" id="eyeIcon"></i>
-                        </button>
-                    </div>
+                    <button type="button" class="btn-toggle-pwd" id="togglePwd"
+                            onclick="togglePassword()">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </button>
                 </div>
                 @error('password')
                     <div class="text-danger small mt-1">{{ $message }}</div>
