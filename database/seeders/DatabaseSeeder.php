@@ -20,11 +20,11 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'employee_id' => 'ADMIN001',
-            'name' => 'Administrator',
+            'name' => 'Administartor',
             'email' => env('ADMIN_MAIL'),
             'password' => env('ADMIN_PASS'),
-            'status' => 1,
             'available' => 1,
+            'status' => 1,
         ]);
 
         User::factory(99)->create();
@@ -35,9 +35,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Equipment::factory(100)->create();
-        
-        $this->call([
-            EquipmentUserSeeder::class,
-        ]);
+
+        EquipmentUser::factory(200)->create();
     }
 }
