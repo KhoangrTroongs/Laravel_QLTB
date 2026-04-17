@@ -10,139 +10,150 @@
 
 @section('content')
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-4">
         <!-- Profile Image -->
-        <div class="card card-primary card-outline shadow-sm border-0">
+        <div class="card card-primary card-outline shadow-sm border-0" style="border-radius: 15px;">
             <div class="card-body box-profile">
-                <div class="text-center mb-3">
+                <div class="text-center mb-4">
                     @if($user->avatar)
-                        <img class="profile-user-img img-fluid img-circle border shadow-sm" 
+                        <img class="profile-user-img img-fluid img-circle border-4 shadow-sm" 
                              src="{{ str_starts_with($user->avatar, 'http') ? $user->avatar : asset('storage/' . $user->avatar) }}" 
-                             alt="User profile picture" style="width: 100px; height: 100px; object-fit: cover;">
+                             alt="User profile picture" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #fff;">
                     @else
-                        <img class="profile-user-img img-fluid img-circle border shadow-sm" 
-                             src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=100&background=random" 
-                             alt="User profile picture">
+                        <img class="profile-user-img img-fluid img-circle border-4 shadow-sm" 
+                             src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=120&background=3b82f6&color=fff" 
+                             alt="User profile picture" style="border: 4px solid #fff;">
                     @endif
                 </div>
 
-                <h3 class="profile-username text-center font-weight-bold">{{ $user->name }}</h3>
-                <p class="text-muted text-center">{{ $user->employee_id }}</p>
+                <h3 class="profile-username text-center font-weight-bold mb-0">{{ $user->name }}</h3>
+                <p class="text-muted text-center mb-4">{{ $user->employee_id }}</p>
 
-                <ul class="list-group list-group-unbordered mb-3">
-                    <li class="list-group-item border-0">
-                        <b>Trạng thái</b> 
-                        <span class="float-right badge {{ $user->status == 1 ? 'badge-success' : 'badge-danger' }} px-2">
-                            {{ $user->status == 1 ? 'Đang làm việc' : 'Đã nghỉ việc' }}
-                        </span>
-                    </li>
-                    <li class="list-group-item border-0">
-                        <b>Thiết bị đang giữ</b> 
-                        <span class="float-right badge badge-primary px-2">
-                            {{ $user->equipments->where('pivot.status', \App\Models\EquipmentUser::STATUS_BORROWING)->count() }}
-                        </span>
-                    </li>
-                    <li class="list-group-item border-0">
-                        <b>Số lần mượn</b> 
-                        <span class="float-right badge badge-info px-2">{{ $user->equipments->count() }}</span>
-                    </li>
-                </ul>
+                <div class="d-flex justify-content-around mb-4 text-center">
+                    <div>
+                        <h5 class="font-weight-bold mb-0">{{ $user->equipments->where('pivot.status', \App\Models\EquipmentUser::STATUS_BORROWING)->count() }}</h5>
+                        <small class="text-muted">Đang giữ</small>
+                    </div>
+                    <div>
+                        <h5 class="font-weight-bold mb-0">{{ $user->equipments->count() }}</h5>
+                        <small class="text-muted">Tổng lần mượn</small>
+                    </div>
+                    <div>
+                        @if($user->status == 1)
+                            <span class="badge badge-success px-2 py-1">Active</span>
+                        @else
+                            <span class="badge badge-danger px-2 py-1">Inactive</span>
+                        @endif
+                    </div>
+                </div>
 
-                <a href="{{ route('users.edit', $user) }}" class="btn btn-warning btn-block font-weight-bold">
-                    <i class="fas fa-edit mr-1"></i> Chỉnh sửa hồ sơ
+                <a href="{{ route('users.edit', $user) }}" class="btn btn-primary btn-block shadow-sm py-2">
+                    <i class="fas fa-user-edit mr-2"></i>Chỉnh sửa hồ sơ
                 </a>
             </div>
         </div>
 
         <!-- About Me Box -->
-        <div class="card card-primary shadow-sm mt-4 border-0">
-            <div class="card-header border-0 bg-white">
-                <h3 class="card-title font-weight-bold text-dark"><i class="fas fa-info-circle mr-2 text-primary"></i>Thông tin liên hệ</h3>
+        <div class="card shadow-sm mt-4 border-0" style="border-radius: 15px;">
+            <div class="card-header border-0 bg-white pt-4">
+                <h3 class="card-title font-weight-bold"><i class="fas fa-id-card mr-2 text-primary"></i>Chi tiết liên hệ</h3>
             </div>
             <div class="card-body">
-                <strong><i class="fas fa-envelope mr-1"></i> Email</strong>
-                <p class="text-muted">{{ $user->email }}</p>
-                <hr>
-                <strong><i class="fas fa-phone mr-1"></i> Số điện thoại</strong>
-                <p class="text-muted">{{ $user->phone ?? 'Chưa cập nhật' }}</p>
-                <hr>
-                <strong><i class="fas fa-map-marker-alt mr-1"></i> Địa chỉ</strong>
-                <p class="text-muted mb-0">{{ $user->address ?? 'Chưa cập nhật' }}</p>
+                <div class="mb-3">
+                    <label class="text-muted small mb-1">Email</label>
+                    <div class="font-weight-600">{{ $user->email }}</div>
+                </div>
+                <div class="mb-3">
+                    <label class="text-muted small mb-1">Số điện thoại</label>
+                    <div class="font-weight-600">{{ $user->phone ?? 'Chưa cập nhật' }}</div>
+                </div>
+                <div class="mb-0">
+                    <label class="text-muted small mb-1">Địa chỉ</label>
+                    <div class="font-weight-600">{{ $user->address ?? 'Chưa cập nhật' }}</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-9">
-        <div class="card card-outline card-info shadow-sm border-0">
-            <div class="card-header border-0 bg-white d-flex align-items-center justify-content-between">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0" style="border-radius: 15px;">
+            <div class="card-header border-0 bg-white pt-4 d-flex justify-content-between align-items-center">
                 <h3 class="card-title font-weight-bold">
-                    <i class="fas fa-history mr-2 text-info"></i>Lịch sử mượn thiết bị
+                    <i class="fas fa-stream mr-2 text-primary"></i>Lịch trình mượn thiết bị
                 </h3>
-                <a href="{{ route('equipment-users.create', ['user_id' => $user->id]) }}" class="btn btn-primary btn-sm rounded-pill px-3">
-                    <i class="fas fa-plus mr-1"></i> Tạo phiếu mới
+                <a href="{{ route('equipment-users.create', ['user_id' => $user->id]) }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 mt-n2">
+                    <i class="fas fa-plus mr-1"></i> Cấp máy mới
                 </a>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="bg-light small font-weight-bold text-muted uppercase">
-                            <tr>
-                                <th class="pl-4 py-3">Thiết Bị</th>
-                                <th class="py-3">Ngày Mượn</th>
-                                <th class="py-3">Hạn Trả</th>
-                                <th class="py-3 text-center">Trạng Thái</th>
-                                <th class="py-3 pr-4 text-center">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($user->equipments as $equipment)
-                            <tr>
-                                <td class="pl-4 py-3">
-                                    <div class="font-weight-bold text-dark">{{ $equipment->name }}</div>
-                                    <small class="text-muted">{{ $equipment->model }}</small>
-                                </td>
-                                <td class="py-3">
-                                    <div class="small">{{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->format('d/m/Y H:i') }}</div>
-                                </td>
-                                <td class="py-3">
-                                    @if($equipment->pivot->hantra)
-                                        <div class="small {{ $equipment->pivot->status == 1 && $equipment->pivot->hantra < now() ? 'text-danger font-weight-bold' : 'text-muted' }}">
-                                            {{ \Carbon\Carbon::parse($equipment->pivot->hantra)->format('d/m/Y') }}
+            <div class="card-body bg-light" style="max-height: 800px; overflow-y: auto; border-radius: 0 0 15px 15px;">
+                <div class="timeline mt-2">
+                    @forelse($user->equipments as $equipment)
+                        @php
+                            $status = $equipment->pivot->status;
+                            $iconColor = 'bg-info';
+                            $statusLabel = 'Chờ duyệt';
+                            if($status == \App\Models\EquipmentUser::STATUS_BORROWING) { $iconColor = 'bg-warning shadow-sm'; $statusLabel = 'Đang mượn'; }
+                            elseif($status == \App\Models\EquipmentUser::STATUS_REJECTED) { $iconColor = 'bg-danger'; $statusLabel = 'Đã từ chối'; }
+                            elseif($status == \App\Models\EquipmentUser::STATUS_RETURNED) { $iconColor = 'bg-success shadow-sm'; $statusLabel = 'Đã trả'; }
+                        @endphp
+                        
+                        <div>
+                            <i class="fas {{ $status == 3 ? 'fa-check' : ($status == 1 ? 'fa-laptop' : ($status == 0 ? 'fa-clock' : 'fa-times')) }} {{ $iconColor }} text-white"></i>
+                            <div class="timeline-item shadow-none border mb-4" style="border-radius: 12px; border-left: 4px solid {{ $status == 3 ? '#28a745' : ($status == 1 ? '#ffc107' : ($status == 2 ? '#dc3545' : '#17a2b8')) }} !important;">
+                                <span class="time text-muted"><i class="fas fa-clock mr-1"></i>{{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->format('H:i d/m/Y') }}</span>
+                                <h3 class="timeline-header font-weight-bold">
+                                    <span class="badge {{ $iconColor }} mr-2" style="font-size: 0.75rem;">{{ $statusLabel }}</span>
+                                    {{ $equipment->name }}
+                                </h3>
+                                <div class="timeline-body">
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="text-muted small">Model</div>
+                                            <div class="font-weight-bold text-indigo small">{{ $equipment->model }}</div>
                                         </div>
-                                    @else
-                                        <span class="text-muted small">-</span>
+                                        <div class="col-sm-6">
+                                            <div class="text-muted small">Thời gian thuê</div>
+                                            <div class="small">
+                                                {{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->format('d/m/Y') }} 
+                                                <i class="fas fa-long-arrow-alt-right mx-1 text-muted"></i> 
+                                                @if($equipment->pivot->ngaytra)
+                                                    {{ \Carbon\Carbon::parse($equipment->pivot->ngaytra)->format('d/m/Y') }}
+                                                @else
+                                                    {{ \Carbon\Carbon::parse($equipment->pivot->hantra)->format('d/m/Y') }}
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @if($equipment->pivot->description)
+                                        <div class="mt-2 p-2 bg-light rounded italic small">
+                                            <i class="fas fa-comment-dots mr-1 opacity-50"></i>{{ $equipment->pivot->description }}
+                                        </div>
                                     @endif
-                                </td>
-                                <td class="py-3 text-center">
-                                    @php
-                                        $status = $equipment->pivot->status;
-                                        $badgeClass = 'info';
-                                        $statusText = 'Chờ duyệt';
-                                        if($status == 1) { $badgeClass = 'warning text-dark'; $statusText = 'Đang mượn'; }
-                                        elseif($status == 2) { $badgeClass = 'danger'; $statusText = 'Từ chối'; }
-                                        elseif($status == 3) { $badgeClass = 'success'; $statusText = 'Đã trả'; }
-                                    @endphp
-                                    <span class="badge badge-{{ $badgeClass }} px-2 py-1">{{ $statusText }}</span>
-                                </td>
-                                <td class="py-3 pr-4 text-center">
-                                    <a href="{{ route('equipment-users.show', $equipment->pivot->id) }}" class="btn btn-outline-info btn-xs rounded-circle" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
-                                    <i class="fas fa-receipt fa-2x mb-2 opacity-50"></i>
-                                    <p class="mb-0">Nhân viên này chưa mượn thiết bị nào.</p>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                </div>
+                                <div class="timeline-footer py-2">
+                                    <a href="{{ route('equipment-users.show', $equipment->pivot->id) }}" class="btn btn-xs outline-primary">Chi tiết phiếu</a>
+                                    <a href="{{ route('equipment.show', $equipment->id) }}" class="btn btn-xs text-muted ml-2">Thông tin máy</a>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x text-muted opacity-25 mb-3"></i>
+                            <p class="text-muted">Chưa có lịch sử mượn trả thiết bị.</p>
+                        </div>
+                    @endforelse
+                    <div>
+                        <i class="fas fa-rocket bg-gray text-white"></i>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .font-weight-600 { font-weight: 600; }
+    .timeline-item { background: #fff !important; }
+    .border-4 { border-width: 4px !important; }
+</style>
 @endsection

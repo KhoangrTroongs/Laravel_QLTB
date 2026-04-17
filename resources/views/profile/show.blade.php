@@ -3,314 +3,268 @@
 
 @section('content')
 <div class="container py-5">
-    <div class="row">
-        <!-- Sidebar Hồ Sơ & Chỉnh sửa -->
-        <div class="col-md-4 mb-4">
-            <!-- Tóm tắt hồ sơ -->
-            <div class="card text-center mb-4" style="border-radius: 24px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.07); overflow: hidden;">
-                <div style="height: 80px; background: linear-gradient(135deg, #3b82f6, #2563eb);"></div>
-                <div class="card-body pt-0" style="padding: 1.5rem;">
-                    <div style="margin-top: -50px; margin-bottom: 1rem;">
-                        @if($user->avatar)
-                            <img src="{{ str_starts_with($user->avatar, 'http') ? $user->avatar : asset('storage/' . $user->avatar) }}"
-                                 class="rounded-circle border border-4 border-white shadow"
-                                 style="width: 100px; height: 100px; object-fit: cover; border-width: 4px !important;">
-                        @else
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=128&background=3b82f6&color=fff"
-                                 class="rounded-circle border border-white shadow"
-                                 style="width: 100px; height: 100px; border-width: 4px !important;">
-                        @endif
-                    </div>
-                    <h5 class="font-weight-bold mb-1">{{ $user->name }}</h5>
-                    <p class="text-muted small mb-2">{{ $user->email }}</p>
-                    <div>
-                        @foreach($user->roles as $role)
-                            <span class="badge {{ $role->name === 'admin' ? 'badge-danger' : ($role->name === 'editor' ? 'badge-primary' : 'badge-secondary') }}"
-                                  style="border-radius: 8px; padding: 0.4rem 0.8rem; font-size: 0.8rem;">
-                                {{ $role->display_name }}
-                            </span>
-                        @endforeach
-                    </div>
-                </div>
-                <div class="card-footer bg-white py-3" style="border-top: 1px solid #f1f5f9;">
-                    <div class="row text-center">
-                        <div class="col">
-                            <div class="font-weight-bold text-dark">{{ $user->employee_id }}</div>
-                            <div class="text-muted small">Mã NV</div>
-                        </div>
-                        <div class="col border-left">
-                            <div class="font-weight-bold {{ $user->status ? 'text-success' : 'text-muted' }}">
-                                {{ $user->status ? 'Hoạt động' : 'Nghỉ việc' }}
-                            </div>
-                            <div class="text-muted small">Trạng thái</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Chỉnh Sửa Thông Tin (Đã di chuyển) -->
-            <div class="card mb-4" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.07);">
-                <div class="card-header bg-white" style="border-radius: 20px 20px 0 0; padding: 1.25rem; border-bottom: 1px solid #f1f5f9;">
-                    <h6 class="mb-0 font-weight-bold text-dark">
-                        <i class="fas fa-user-edit mr-2 text-primary"></i> Chỉnh Sửa
-                    </h6>
-                </div>
-                <div class="card-body p-3">
-                    <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
-                        @csrf @method('PUT')
-                        <div class="form-group mb-3 text-center">
-                            <div class="custom-file-wrapper" style="max-width: 250px; margin: 0 auto;">
-                                <input type="file" name="avatar" id="avatarInput" class="custom-file-input-hidden" accept="image/*" onchange="handleFileSelect(this)">
-                                <label for="avatarInput" class="custom-file-trigger d-flex align-items-center justify-content-center">
-                                    <div class="icon-box mr-2"><i class="fas fa-camera"></i></div>
-                                    <span class="file-name text-muted small">Thay ảnh đại diện</span>
-                                </label>
-                            </div>
-                            @error('avatar') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="form-group mb-2">
-                            <label class="font-weight-bold text-muted extra-small">HỌ VÀ TÊN *</label>
-                            <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-control form-control-sm" style="border-radius: 8px;">
-                            @error('name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="form-group mb-2">
-                            <label class="font-weight-bold text-muted extra-small">SỐ ĐIỆN THOẠI</label>
-                            <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="form-control form-control-sm" style="border-radius: 8px;">
-                            @error('phone') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                        </div>
-
-                        <div class="form-group mb-3">
-                            <label class="font-weight-bold text-muted extra-small">ĐỊA CHỈ</label>
-                            <textarea name="address" class="form-control form-control-sm" rows="2" style="border-radius: 8px; resize: none;">{{ old('address', $user->address) }}</textarea>
-                            @error('address') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-block btn-sm py-2" style="border-radius: 8px; font-weight: 700;">
-                            <i class="fas fa-save mr-1"></i> Cập Nhật
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Card Đổi Mật Khẩu (Đã di chuyển) -->
-            <div class="card mb-4" style="border-radius: 20px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.07);">
-                <div class="card-header bg-white" style="border-radius: 20px 20px 0 0; padding: 1.25rem; border-bottom: 1px solid #f1f5f9;">
-                    <h6 class="mb-0 font-weight-bold text-dark">
-                        <i class="fas fa-key mr-2 text-warning"></i> Đổi Mật Khẩu
-                    </h6>
-                </div>
-                <div class="card-body p-3">
-                    <form method="POST" action="{{ route('profile.change-password') }}">
-                        @csrf @method('PUT')
-                        <div class="form-group mb-2">
-                            <label class="font-weight-bold text-muted extra-small">MẬT KHẨU CŨ</label>
-                            <div class="input-group-auth">
-                                <input type="password" name="current_password" id="p_cur" class="form-control form-control-sm">
-                                <button class="btn-toggle-pwd" type="button" onclick="tgl('p_cur', 'i_cur')">
-                                    <i class="fas fa-eye" id="i_cur"></i>
-                                </button>
-                            </div>
-                            @error('current_password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="form-group mb-2">
-                            <label class="font-weight-bold text-muted extra-small">MẬT KHẨU MỚI</label>
-                            <div class="input-group-auth">
-                                <input type="password" name="password" id="p_new" class="form-control form-control-sm">
-                                <button class="btn-toggle-pwd" type="button" onclick="tgl('p_new', 'i_new')">
-                                    <i class="fas fa-eye" id="i_new"></i>
-                                </button>
-                            </div>
-                            @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
-                        </div>
-                        <div class="form-group mb-3">
-                            <label class="font-weight-bold text-muted extra-small">XÁC NHẬN MỚI</label>
-                            <div class="input-group-auth">
-                                <input type="password" name="password_confirmation" id="p_conf" class="form-control form-control-sm">
-                                <button class="btn-toggle-pwd" type="button" onclick="tgl('p_conf', 'i_conf')">
-                                    <i class="fas fa-eye" id="i_conf"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-warning btn-block btn-sm py-2" style="border-radius: 8px; font-weight: 700;">
-                            <i class="fas fa-lock mr-1"></i> Đổi Mật Khẩu
-                        </button>
-                    </form>
-                </div>
-            </div>
+    <!-- Hero Section with blurred background effect -->
+    <div class="card border-0 shadow-sm mb-4 overflow-hidden" style="border-radius: 24px; background: #fff;">
+        <div style="height: 180px; background: url('https://images.unsplash.com/photo-1557683316-973673baf926?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(30, 41, 59, 0.4);"></div>
         </div>
-
-        <!-- Cột Báo Cáo Thiết Bị Mượn (Chính giữa bên phải) -->
-        <div class="col-md-8">
-            <div class="card h-100" style="border-radius: 24px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.07); overflow: hidden;">
-                <div class="card-header bg-white d-flex align-items-center justify-content-between" style="padding: 1.75rem 2rem; border-bottom: 1px solid #f1f5f9;">
-                    <h5 class="mb-0 font-weight-bold text-dark">
-                        <i class="fas fa-history mr-2 text-primary"></i> Lịch Sử Mượn Thiết Bị
-                    </h5>
-                    <span class="badge badge-pill badge-light text-muted px-3 py-2" style="font-size: 0.85rem;">
-                        Tổng cộng: {{ $user->equipments->count() }}
+        <div class="card-body text-center" style="position: relative; margin-top: -70px; padding-bottom: 2.5rem;">
+            <div class="mb-3">
+                @if($user->avatar)
+                    <img src="{{ str_starts_with($user->avatar, 'http') ? $user->avatar : asset('storage/' . $user->avatar) }}"
+                         class="rounded-circle border border-4 border-white shadow-lg mx-auto"
+                         style="width: 140px; height: 140px; object-fit: cover; background: #fff;">
+                @else
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&size=140&background=3b82f6&color=fff"
+                         class="rounded-circle border border-4 border-white shadow-lg mx-auto"
+                         style="width: 140px; height: 140px; background: #fff;">
+                @endif
+            </div>
+            <h3 class="font-weight-bold mb-1 text-dark">{{ $user->name }}</h3>
+            <p class="text-muted mb-3"><i class="fas fa-id-badge mr-1"></i> {{ $user->employee_id }} — {{ $user->email }}</p>
+            <div class="d-flex justify-content-center" style="gap: 10px;">
+                @foreach($user->roles as $role)
+                    <span class="badge {{ $role->name === 'admin' ? 'bg-danger text-white' : 'bg-primary text-white' }} px-3 py-2 rounded-pill shadow-xs" style="font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px;">
+                        {{ $role->display_name }}
                     </span>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                    <h6 class="font-weight-bold text-dark"><i class="fas fa-address-book mr-2 text-primary"></i>Liên Hệ & Thống Kê</h6>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0" style="vertical-align: middle;">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="border-0 pl-4 py-3 text-muted small font-weight-bold">THIẾT BỊ</th>
-                                    <th class="border-0 py-3 text-muted small font-weight-bold">THỜI GIAN</th>
-                                    <th class="border-0 py-3 text-muted small font-weight-bold text-center">TRẠNG THÁI</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($user->equipments as $equipment)
-                                    <tr id="record-{{ $equipment->pivot->id }}">
-                                        <td class="pl-4 py-4">
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-light rounded p-2 mr-3 text-primary" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                                                    <i class="fas fa-{{ str_contains(strtolower($equipment->name), 'laptop') ? 'laptop' : (str_contains(strtolower($equipment->name), 'chuột') ? 'mouse' : 'tools') }}"></i>
-                                                </div>
-                                                <div>
-                                                    <div class="font-weight-bold text-dark mb-0">{{ $equipment->name }}</div>
-                                                    <div class="text-muted extra-small">{{ $equipment->model }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-4">
-                                            <div class="text-dark small"><i class="far fa-calendar-alt mr-1 text-muted"></i> {{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->format('d/m/Y') }}</div>
-                                            <div class="text-muted extra-small">{{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->diffForHumans() }}</div>
-                                        </td>
-                                        <td class="py-4 text-center status-cell">
-                                            @if($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_PENDING)
-                                                <span class="badge badge-warning px-3 py-2" style="border-radius: 8px; font-weight: 600;">
-                                                    <i class="fas fa-spinner fa-spin mr-1"></i> Chờ duyệt
-                                                </span>
-                                            @elseif($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_BORROWING)
-                                                <span class="badge badge-primary px-3 py-2" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                                                    <i class="fas fa-clock mr-1"></i> Đang mượn
-                                                </span>
-                                            @elseif($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_REJECTED)
-                                                <span class="badge badge-danger px-3 py-2" style="border-radius: 8px; font-weight: 600;">
-                                                    <i class="fas fa-times-circle mr-1"></i> Từ chối
-                                                </span>
-                                            @elseif($equipment->pivot->status == \App\Models\EquipmentUser::STATUS_RETURNED)
-                                                <span class="badge badge-success px-3 py-2" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #10b981, #059669);">
-                                                    <i class="fas fa-check-circle mr-1"></i> Đã trả
-                                                </span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="3" class="text-center py-5">
-                                            <div class="mb-3" style="font-size: 3rem; opacity: 0.1; color: #3b82f6;">
-                                                <i class="fas fa-box-open"></i>
-                                            </div>
-                                            <p class="text-muted">Bạn chưa mượn thiết bị nào.</p>
-                                            <a href="{{ route('home') }}" class="btn btn-primary btn-sm px-4" style="border-radius: 10px;">
-                                                Mượn ngay
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                <div class="card-body p-4">
+                    <div class="p-3 bg-light rounded-lg mb-3">
+                        <div class="small text-muted mb-1">Số điện thoại</div>
+                        <div class="font-weight-bold">{{ $user->phone ?? 'Chưa cập nhật' }}</div>
                     </div>
+                    <div class="p-3 bg-light rounded-lg mb-4">
+                        <div class="small text-muted mb-1">Địa chỉ cá nhân</div>
+                        <div class="font-weight-600 mb-0" style="line-height: 1.4;">{{ $user->address ?? 'Chưa cập nhật' }}</div>
+                    </div>
+                    <div class="row no-gutters text-center py-3 border-top">
+                        <div class="col-6 border-right">
+                            <div class="h5 font-weight-bold text-primary mb-0">{{ $user->equipments->where('pivot.status', 1)->count() }}</div>
+                            <div class="text-xs text-muted uppercase font-weight-bold">Đang giữ</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="h5 font-weight-bold text-dark mb-0">{{ $user->equipments->count() }}</div>
+                            <div class="text-xs text-muted uppercase font-weight-bold">Tổng mượn</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Reminder -->
+            <div class="card border-0 shadow-sm" style="border-radius: 20px; background: #fff;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-shield-alt text-success mr-2"></i>
+                        <span class="font-weight-bold small text-dark">Bảo mật tài khoản</span>
+                    </div>
+                    <p class="text-muted small mb-0 mt-2">
+                        Thay đổi mật khẩu định kỳ 3 tháng một lần để bảo vệ dữ liệu cá nhân của bạn.
+                    </p>
                 </div>
             </div>
         </div>
 
-        <style>
-            .extra-small { font-size: 0.7rem; letter-spacing: 0.5px; text-transform: uppercase; }
-            .form-control-sm { padding: 0.6rem 0.8rem; font-size: 0.85rem; }
-            .custom-file-trigger { 
-                padding: 0.6rem 1rem !important; 
-                border-radius: 10px !important; 
-                min-height: auto !important;
-            }
-            .custom-file-trigger .icon-box { width: 20px !important; height: 20px !important; font-size: 0.75rem !important; }
-        </style>
+        <!-- Main Content with Nav Tabs Inside Card Header -->
+        <div class="col-lg-8">
+            <div class="card card-primary card-outline card-outline-tabs border-0 shadow-sm" style="border-radius: 20px; overflow: hidden;">
+                <div class="card-header p-0 border-bottom-0 bg-white">
+                    <ul class="nav nav-tabs custom-adminlte-tabs" id="profileTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active font-weight-bold px-4 py-3" id="timeline-tab" data-toggle="pill" href="#timeline" role="tab" style="border-top: none; border-left: none; border-right: none;">
+                                <i class="fas fa-stream mr-2"></i>Hành trình mượn trả
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link font-weight-bold px-4 py-3" id="settings-tab" data-toggle="pill" href="#settings" role="tab" style="border-top: none; border-left: none; border-right: none;">
+                                <i class="fas fa-user-cog mr-2"></i>Cài đặt tài khoản
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body bg-white p-4" style="min-height: 550px;">
+                    <div class="tab-content" id="profileTabContent">
+                        <!-- Tab 1: Timeline -->
+                        <div class="tab-pane fade show active" id="timeline" role="tabpanel">
+                            <div class="timeline ml-2">
+                                @forelse($user->equipments()->orderBy('equipment_users.id', 'desc')->get() as $equipment)
+                                    @php
+                                        $status = $equipment->pivot->status;
+                                        $iconClass = match($status) {
+                                            1 => 'fa-laptop bg-warning elevation-1',
+                                            2 => 'fa-times bg-danger',
+                                            3 => 'fa-check bg-success elevation-1',
+                                            default => 'fa-clock bg-info'
+                                        };
+                                        $color = match($status) {
+                                            1 => '#f59e0b',
+                                            2 => '#ef4444',
+                                            3 => '#10b981',
+                                            default => '#3b82f6'
+                                        };
+                                    @endphp
+                                    <div>
+                                        <i class="fas {{ $iconClass }} text-white"></i>
+                                        <div class="timeline-item shadow-none border mb-4" style="border-radius: 12px; border-left: 4px solid {{ $color }} !important;">
+                                            <span class="time text-muted small"><i class="fas fa-history mr-1"></i>{{ \Carbon\Carbon::parse($equipment->pivot->ngaymuon)->diffForHumans() }}</span>
+                                            <h3 class="timeline-header font-weight-bold border-0 pt-3">
+                                                {{ $equipment->name }}
+                                            </h3>
+                                            <div class="timeline-body py-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span class="text-muted small">Model:</span>
+                                                        <span class="font-weight-bold text-dark ml-1">{{ $equipment->model }}</span>
+                                                    </div>
+                                                    <div>
+                                                        <span class="badge px-3 py-1" style="background: {{ $color }}15; color: {{ $color }}; border-radius: 6px; font-size: 0.75rem;">
+                                                            {{ match($status) { 1 => 'Đang mượn', 2 => 'Từ chối', 3 => 'Đã trả', default => 'Chờ duyệt' } }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-rocket fa-3x text-muted opacity-25 mb-3"></i>
+                                        <p class="text-muted font-weight-bold">Hãy mượn thiết bị đầu tiên của bạn!</p>
+                                    </div>
+                                @endforelse
+                                <div><i class="fas fa-flag-checkered bg-gray text-white"></i></div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 2: Settings -->
+                        <div class="tab-pane fade" id="settings" role="tabpanel">
+                            <div class="row">
+                                <!-- Profile settings form group -->
+                                <div class="col-md-12 mb-5">
+                                    <div class="p-3 mb-4 bg-light rounded-lg d-flex align-items-center">
+                                        <i class="fas fa-user-edit text-primary mr-3 h5 mb-0"></i>
+                                        <div class="font-weight-bold text-dark">Chỉnh sửa hồ sơ</div>
+                                    </div>
+                                    <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
+                                        @csrf @method('PUT')
+                                        <div class="row">
+                                            <div class="col-md-12 text-center mb-4">
+                                                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" onclick="document.getElementById('avatarInput').click()">
+                                                    <i class="fas fa-camera mr-2"></i>Thay ảnh đại diện
+                                                </button>
+                                                <input type="file" name="avatar" id="avatarInput" class="d-none" onchange="handleFileSelect(this)">
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label class="font-weight-bold small text-muted">HỌ VÀ TÊN</label>
+                                                <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-control form-control-modern">
+                                            </div>
+                                            <div class="col-md-6 form-group">
+                                                <label class="font-weight-bold small text-muted">SỐ ĐIỆN THOẠI</label>
+                                                <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" class="form-control form-control-modern">
+                                            </div>
+                                            <div class="col-md-12 form-group mb-4">
+                                                <label class="font-weight-bold small text-muted">ĐỊA CHỈ</label>
+                                                <textarea name="address" class="form-control form-control-modern" rows="2">{{ old('address', $user->address) }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <button type="submit" class="btn btn-primary px-5 shadow-sm font-weight-bold">Lưu Thông Tin</button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Security form group -->
+                                <div class="col-md-12">
+                                    <div class="p-3 mb-4 bg-light rounded-lg d-flex align-items-center">
+                                        <i class="fas fa-lock text-warning mr-3 h5 mb-0"></i>
+                                        <div class="font-weight-bold text-dark">Đổi mật khẩu bảo mật</div>
+                                    </div>
+                                    <form method="POST" action="{{ route('profile.change-password') }}">
+                                        @csrf @method('PUT')
+                                        <div class="row">
+                                            <div class="col-md-4 form-group">
+                                                <label class="font-weight-bold small text-muted">MẬT KHẨU CŨ</label>
+                                                <div class="position-relative">
+                                                    <input type="password" name="current_password" id="old_p" class="form-control form-control-modern">
+                                                    <i class="fas fa-eye text-muted" style="position: absolute; right: 12px; top: 12px; cursor: pointer;" onclick="tgl('old_p', this)"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 form-group">
+                                                <label class="font-weight-bold small text-muted">MẬT KHẨU MỚI</label>
+                                                <div class="position-relative">
+                                                    <input type="password" name="password" id="new_p" class="form-control form-control-modern">
+                                                    <i class="fas fa-eye text-muted" style="position: absolute; right: 12px; top: 12px; cursor: pointer;" onclick="tgl('new_p', this)"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4 form-group mb-4">
+                                                <label class="font-weight-bold small text-muted">XÁC NHẬN MỚI</label>
+                                                <input type="password" name="password_confirmation" class="form-control form-control-modern">
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <button type="submit" class="btn btn-warning px-5 shadow-sm font-weight-bold">Cập Nhật Mật Khẩu</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+    body { background-color: #f4f6f9; }
+    .custom-adminlte-tabs .nav-link { border: none !important; color: #6c757d; border-bottom: 3px solid transparent !important; }
+    .custom-adminlte-tabs .nav-link.active { background-color: transparent !important; color: #007bff !important; border-bottom: 3px solid #007bff !important; }
+    .custom-adminlte-tabs .nav-link:hover { color: #007bff; }
+    
+    .form-control-modern { border-radius: 8px; border: 1px solid #ddd; padding: 0.6rem 0.85rem; font-size: 0.9rem; }
+    .form-control-modern:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
+    
+    .timeline::before { left: 24px !important; }
+    .timeline > div > i { left: 10px !important; width: 30px !important; height: 30px !important; line-height: 30px !important; }
+    .timeline-item { background: #fff !important; margin-left: 55px !important; }
+    
+    .rounded-lg { border-radius: 12px !important; }
+    .font-weight-600 { font-weight: 600; }
+    .text-xs { font-size: 0.65rem; }
+    .shadow-xs { box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+</style>
 @endsection
 
 @push('scripts')
 <script>
-$(document).ready(function() {
-    if (typeof window.Echo !== 'undefined') {
-        window.Echo.private('App.Models.User.{{ auth()->id() }}')
-            .notification((notification) => {
-                if (notification.type === 'App\\Notifications\\BorrowRequestResponse') {
-                    const recordId = notification.record_id;
-                    const status = notification.status;
-                    const row = $('#record-' + recordId);
-                    
-                    if (row.length > 0) {
-                        const statusCell = row.find('.status-cell');
-                        let badgeHtml = '';
-                        
-                        // Status constants matching PHP model
-                        const STATUS_BORROWING = 1;
-                        const STATUS_REJECTED = 2;
-                        const STATUS_RETURNED = 3;
-                        
-                        if (status == STATUS_BORROWING) {
-                            badgeHtml = '<span class="badge badge-primary px-3 py-2 animate__animated animate__pulse" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #3b82f6, #2563eb);"><i class="fas fa-clock mr-1"></i> Đang mượn</span>';
-                        } else if (status == STATUS_REJECTED) {
-                            badgeHtml = '<span class="badge badge-danger px-3 py-2 animate__animated animate__shakeX" style="border-radius: 8px; font-weight: 600;"><i class="fas fa-times-circle mr-1"></i> Từ chối</span>';
-                        } else if (status == STATUS_RETURNED) {
-                            badgeHtml = '<span class="badge badge-success px-3 py-2 animate__animated animate__bounceIn" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #10b981, #059669);"><i class="fas fa-check-circle mr-1"></i> Đã trả</span>';
-                        }
-                        
-                        if (badgeHtml) {
-                            statusCell.html(badgeHtml);
-                            // Highlight the updated row
-                            row.css('background-color', '#f0fdf4');
-                            setTimeout(() => { row.css('background-color', 'transparent'); }, 3000);
-                        }
-                    }
-                }
-            });
-    }
-});
-
-function handleFileSelect(input) {
-    const fileNameSpan = input.closest('.custom-file-wrapper').querySelector('.file-name');
-    
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        
-        // Update label text
-        fileNameSpan.textContent = file.name;
-        fileNameSpan.classList.remove('text-muted');
-        fileNameSpan.classList.add('text-primary', 'font-weight-bold');
-        
-        // Preview image
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            // Update sidebar avatar
-            const avatarImg = document.querySelector('.card img.rounded-circle');
-            if (avatarImg) {
-                avatarImg.src = e.target.result;
-            }
-        }
-        reader.readAsDataURL(file);
-    } else {
-        fileNameSpan.textContent = 'Bấm để chọn ảnh...';
-        fileNameSpan.classList.remove('text-primary', 'font-weight-bold');
-        fileNameSpan.classList.add('text-muted');
-    }
-}
-
-function tgl(id, iconId) {
+function tgl(id, el) {
     const p = document.getElementById(id);
-    const i = document.getElementById(iconId);
     if (p.type === 'password') {
         p.type = 'text';
-        i.className = 'fas fa-eye-slash';
+        el.className = 'fas fa-eye-slash text-muted';
     } else {
         p.type = 'password';
-        i.className = 'fas fa-eye';
+        el.className = 'fas fa-eye text-muted';
+    }
+}
+function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelectorAll('img.rounded-circle').forEach(img => {
+                img.src = e.target.result;
+            });
+        }
+        reader.readAsDataURL(input.files[0]);
     }
 }
 </script>

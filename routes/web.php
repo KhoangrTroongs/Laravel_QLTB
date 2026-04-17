@@ -71,6 +71,34 @@ Route::middleware(['auth', 'role:admin,editor'])->group(function () {
         $pendingCount = EquipmentUser::where('status', EquipmentUser::STATUS_PENDING)->count();
         $availableEquipmentCount = Equipment::where('status', 1)->where('available', 1)->count() - $borrowingCount;
 
+        // Dữ liệu cho biểu đồ phân bổ loại thiết bị
+        $categoryDistribution = \App\Models\Category::withCount('equipment')->get();
+        
+        $pendingItems = EquipmentUser::with(['user', 'equipment'])
+            ->where('status', EquipmentUser::STATUS_PENDING)
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Thống kê xu hướng mượn thiết bị (7 ngày gần nhất)
+        $borrowingTrends = EquipmentUser::selectRaw('DATE(ngaymuon) as date, count(*) as total')
+            ->where('ngaymuon', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Top 5 người mượn nhiều nhất
+        $topBorrowers = User::withCount('equipments')
+            ->orderBy('equipments_count', 'desc')
+            ->take(5)
+            ->get();
+
+        // Top 5 thiết bị được mượn nhiều nhất
+        $popularEquipment = Equipment::withCount('users')
+            ->orderBy('users_count', 'desc')
+            ->take(5)
+            ->get();
+
         return view('dashboard', compact(
             'userCount',
             'equipmentCount',
@@ -78,7 +106,12 @@ Route::middleware(['auth', 'role:admin,editor'])->group(function () {
             'overdueCount',
             'latestRecords',
             'availableEquipmentCount',
-            'pendingCount'
+            'pendingCount',
+            'categoryDistribution',
+            'pendingItems',
+            'borrowingTrends',
+            'topBorrowers',
+            'popularEquipment'
         ));
     })->name('dashboard');
 
