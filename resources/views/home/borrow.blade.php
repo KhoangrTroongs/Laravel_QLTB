@@ -42,37 +42,40 @@
                 </div>
             </div>
 
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <label class="font-weight-bold text-muted small">NGƯỜI MƯỢN</label>
-                    <div class="form-control d-flex align-items-center" style="background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; height: 50px;">
-                        <i class="fas fa-user mr-2 text-primary"></i> {{ Auth::user()->name }}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <label class="font-weight-bold text-muted small">NGÀY MƯỢN</label>
-                    <div class="form-control d-flex align-items-center" style="background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; height: 50px;">
-                        <i class="fas fa-calendar-check mr-2 text-success"></i> {{ now()->format('d/m/Y') }}
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <label class="font-weight-bold text-muted small">HẠN TRẢ DỰ KIẾN</label>
-                    <div class="input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text" style="background: #fff; border-right: none; border-radius: 12px 0 0 12px; border: 1.5px solid #e2e8f0;">
-                                <i class="fas fa-calendar-alt text-danger"></i>
-                            </span>
-                        </div>
-                        <input type="date" name="hantra" class="form-control text-center" 
-                               style="border-radius: 0 12px 12px 0; border: 1.5px solid #e2e8f0; border-left: none; height: 50px; font-weight: 600;"
-                               value="{{ now()->addDays(14)->format('Y-m-d') }}">
-                    </div>
-                </div>
-            </div>
-
             <!-- Form -->
             <form method="POST" action="{{ route('home.borrow.store', $equipment) }}">
                 @csrf
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="font-weight-bold text-muted small">NGƯỜI MƯỢN</label>
+                        <div class="form-control d-flex align-items-center" style="background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; height: 50px;">
+                            <i class="fas fa-user mr-2 text-primary"></i> {{ Auth::user()->name }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="font-weight-bold text-muted small">NGÀY MƯỢN</label>
+                        <div class="form-control d-flex align-items-center" style="background: #f1f5f9; border-radius: 12px; border: 1px solid #e2e8f0; height: 50px;">
+                            <i class="fas fa-calendar-check mr-2 text-success"></i> {{ now()->format('d/m/Y') }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="font-weight-bold text-muted small">HẠN TRẢ DỰ KIẾN</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" style="background: #fff; border-right: none; border-radius: 12px 0 0 12px; border: 1.5px solid #e2e8f0;">
+                                    <i class="fas fa-calendar-alt text-danger"></i>
+                                </span>
+                            </div>
+                            <input type="date" name="hantra" class="form-control text-center @error('hantra') is-invalid @enderror" 
+                                   style="border-radius: 0 12px 12px 0; border: 1.5px solid #e2e8f0; border-left: none; height: 50px; font-weight: 600;"
+                                   value="{{ old('hantra', now()->addDays(14)->format('Y-m-d')) }}">
+                            @error('hantra')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-group">
                     <label class="font-weight-bold text-muted small">GHI CHÚ (không bắt buộc)</label>
                     <textarea name="description" rows="3"

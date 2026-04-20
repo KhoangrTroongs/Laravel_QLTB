@@ -53,8 +53,8 @@
                     <label class="small font-weight-bold text-muted">ĐẾN NGÀY</label>
                     <input type="date" name="to_date" class="form-control shadow-sm" value="{{ request('to_date') }}">
                 </div>
-                <div class="col-md-2">
-                    <div class="btn-group w-100">
+                <div class="col-md-1">
+                    <div class="btn-group w-25">
                         <button type="submit" class="btn btn-primary shadow-sm" title="Lọc dữ liệu">
                             <i class="fas fa-filter"></i>
                         </button>
@@ -118,7 +118,9 @@
                     </td>
                     <td>
                         <div class="text-dark"><i class="far fa-calendar-alt mr-1 text-info"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('d/m/Y') }}</div>
-                        @if($record->hantra)
+                        @if($record->status == \App\Models\EquipmentUser::STATUS_RETURNED && $record->ngaytra)
+                            <div class="mt-1"><span class="badge badge-success px-2 py-1" style="font-size: 0.7rem;"><i class="fas fa-check-circle mr-1"></i>Trả: {{ \Carbon\Carbon::parse($record->ngaytra)->format('d/m/Y') }}</span></div>
+                        @elseif($record->hantra)
                             <small class="text-danger font-weight-bold"><i class="fas fa-hourglass-half mr-1"></i>Hạn: {{ \Carbon\Carbon::parse($record->hantra)->format('d/m/Y') }}</small>
                         @endif
                         <div class="small text-muted"><i class="far fa-clock mr-1"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('H:i') }}</div>

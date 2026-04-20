@@ -55,7 +55,13 @@ class NewBorrowRequest extends Notification
             'record_id' => $this->borrowRecord->id,
             'link' => route('equipment-users.show', $this->borrowRecord->id),
             'user_name' => $this->borrowRecord->user->name,
+            'employee_id' => $this->borrowRecord->user->employee_id,
+            'user_avatar' => $this->borrowRecord->user->avatar,
             'equipment_name' => $this->borrowRecord->equipment->name,
+            'equipment_model' => $this->borrowRecord->equipment->model,
+            'hantra' => $this->borrowRecord->hantra,
+            'description' => $this->borrowRecord->description,
+            'created_at' => $this->borrowRecord->created_at->toDateTimeString(),
         ];
     }
 

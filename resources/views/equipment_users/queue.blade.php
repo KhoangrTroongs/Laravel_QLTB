@@ -106,4 +106,92 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    if (typeof window.Echo !== 'undefined') {
+        window.Echo.private(`App.Models.User.{{ auth()->id() }}`)
+            .notification((notification) => {
+                if (notification.type === 'App\\Notifications\\NewBorrowRequest') {
+                    // Update Header Badge
+                    const badge = $('.card-header .badge');
+                    let count = parseInt(badge.text() || 0);
+                    badge.text(count + 1);
+
+                    // Remove Empty State if exists
+                    const tableBody = $('tbody');
+                    const emptyState = tableBody.find('td[colspan="6"]').closest('tr');
+                    if (emptyState.length) emptyState.remove();
+
+                    // Add New Row
+                    const avatarUrl = notification.user_avatar 
+                        ? (notification.user_avatar.startsWith('http') ? notification.user_avatar : `/storage/${notification.user_avatar}`)
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(notification.user_name)}&background=6610f2&color=fff`;
+
+                    const approveUrl = `{{ url('equipment-users') }}/${notification.record_id}/approve`;
+                    const rejectUrl = `{{ url('equipment-users') }}/${notification.record_id}/reject`;
+
+                    let hantraFormatted = 'N/A';
+                    if (notification.hantra) {
+                        const date = new Date(notification.hantra);
+                        hantraFormatted = date.toLocaleDateString('vi-VN');
+                    }
+
+                    const rowCount = tableBody.find('tr').length + 1;
+                    
+                    const newRow = `
+                        <tr class="animate__animated animate__fadeInDown" style="background-color: #f5f3ff;">
+                            <td class="pl-4 text-muted">${rowCount}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="${avatarUrl}" class="rounded-circle mr-2 border" style="width: 32px; height: 32px; object-fit: cover;">
+                                    <div>
+                                        <div class="font-weight-bold text-dark">${notification.user_name}</div>
+                                        <div class="small text-muted">${notification.employee_id}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="font-weight-600 text-dark">${notification.equipment_name}</div>
+                                <div class="small text-indigo font-weight-bold">${notification.equipment_model}</div>
+                            </td>
+                            <td>
+                                <div class="text-dark"><i class="far fa-calendar-alt mr-1"></i>Hôm nay</div>
+                                <div class="small text-muted"><i class="far fa-clock mr-1"></i>vừa xong</div>
+                            </td>
+                            <td>
+                                <div class="text-danger font-weight-bold">
+                                    <i class="fas fa-calendar-check mr-1"></i>${hantraFormatted}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <form action="${approveUrl}" method="POST" class="d-inline">
+                                        <input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH">
+                                        <button type="submit" class="btn btn-success btn-sm px-3 mr-1 shadow-xs">
+                                            <i class="fas fa-check mr-1"></i> Duyệt
+                                        </button>
+                                    </form>
+                                    <form action="${rejectUrl}" method="POST" class="d-inline">
+                                        <input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH">
+                                        <button type="submit" class="btn btn-danger btn-sm px-3 shadow-xs">
+                                            <i class="fas fa-times mr-1"></i> Từ chối
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.prepend(newRow);
+
+                    setTimeout(() => {
+                        tableBody.find('tr').first().css('background-color', 'transparent', 'important');
+                    }, 5000);
+                }
+            });
+    }
+});
+</script>
+@endpush
 @endsection

@@ -189,20 +189,19 @@
             <li class="nav-item dropdown">
                 <a class="nav-link" data-toggle="dropdown" href="#" aria-expanded="false" title="Thông báo" style="padding: 10px 15px; display: flex; align-items: center; position: relative;">
                     <i class="far fa-bell" style="font-size: 1.5rem;"></i>
-                    @if(auth()->user()->unreadNotifications->count() > 0)
-                        <span class="badge badge-danger navbar-badge" style="font-size: 0.65rem; top: 4px; right: 6px; padding: 2px 4px; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff;">
-                            {{ auth()->user()->unreadNotifications->count() }}
-                        </span>
-                    @endif
+                    @php $unreadNotifCount = auth()->user()->unreadNotifications->count(); @endphp
+                    <span id="nav-notif-badge" class="badge badge-danger navbar-badge {{ $unreadNotifCount == 0 ? 'd-none' : '' }}" style="font-size: 0.65rem; top: 4px; right: 6px; padding: 2px 4px; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff;">
+                        {{ $unreadNotifCount }}
+                    </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right border-0 shadow-lg mt-2" style="border-radius: 15px; overflow: hidden; min-width: 320px;">
                     <div class="dropdown-header text-center py-3 bg-light border-bottom">
                         <span class="text-dark font-weight-bold" style="font-size: 1rem;">
-                            <i class="fas fa-bell mr-2 text-primary"></i>Thông báo ({{ auth()->user()->unreadNotifications->count() }})
+                            <i class="fas fa-bell mr-2 text-primary"></i>Thông báo (<span id="notif-count-val">{{ $unreadNotifCount }}</span>)
                         </span>
                     </div>
                     <div class="dropdown-divider m-0"></div>
-                    <div style="max-height: 350px; overflow-y: auto;">
+                    <div id="notification-dropdown-items" style="max-height: 350px; overflow-y: auto;">
                         @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
                             @php
                                 $type = $notification->data['type'] ?? 'default';
@@ -344,9 +343,9 @@
                             <p>
                                 Hàng Đợi Duyệt
                                 @php $pendingCount = \App\Models\EquipmentUser::where('status', 0)->count(); @endphp
-                                @if($pendingCount > 0)
-                                    <span class="badge badge-warning right shadow-xs">{{ $pendingCount }}</span>
-                                @endif
+                                <span id="sidebar-queue-badge" class="badge badge-warning right shadow-xs {{ $pendingCount == 0 ? 'd-none' : '' }}">
+                                    {{ $pendingCount }}
+                                </span>
                             </p>
                         </a>
                     </li>
@@ -527,18 +526,78 @@
                 .notification((notification) => {
                     console.log('New notification:', notification);
                     
-                    // Update badge count
-                    const badge = $('.navbar-badge');
-                    let currentCount = parseInt(badge.text() || 0);
-                    currentCount++;
-                    
-                    if (badge.length) {
-                        badge.text(currentCount).show();
-                    } else {
-                        $('.nav-link .fa-bell').after(`<span class="badge badge-danger navbar-badge" style="font-size: 0.65rem; top: 4px; right: 6px; padding: 2px 4px; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff;">${currentCount}</span>`);
+                    // 1. Update Navbar Badge (Bell)
+                    const navBadge = $('#nav-notif-badge');
+                    let currentNavCount = parseInt(navBadge.text().trim() || 0);
+                    navBadge.text(currentNavCount + 1).removeClass('d-none').show();
+
+                    // 2. Update Dropdown Header Count
+                    const headerVal = $('#notif-count-val');
+                    if (headerVal.length) {
+                        headerVal.text(currentNavCount + 1);
                     }
 
-                    // Show Toast
+                    // 3. Update Sidebar Badge (if new request)
+                    if (notification.type.includes('NewBorrowRequest')) {
+                        const sidebarBadge = $('#sidebar-queue-badge');
+                        if (sidebarBadge.length) {
+                            let count = parseInt(sidebarBadge.text().trim() || 0);
+                            sidebarBadge.text(count + 1).removeClass('d-none').show();
+                        }
+                    }
+
+                    // 4. Prepend to Dropdown Items
+                    const dropdownItems = $('#notification-dropdown-items');
+                    if (dropdownItems.length) {
+                        // Remove "No notification" message if present
+                        dropdownItems.find('.opacity-25').closest('div').remove();
+
+                        const bgMapping = {
+                            'OverdueReminderNotification': 'danger',
+                            'NewBorrowRequest': 'info',
+                            'BorrowRequestResponse': 'success',
+                            'MissedBorrowRequest': 'warning'
+                        };
+                        const iconMapping = {
+                            'OverdueReminderNotification': 'fa-exclamation-triangle',
+                            'NewBorrowRequest': 'fa-envelope',
+                            'BorrowRequestResponse': 'fa-check-circle',
+                            'MissedBorrowRequest': 'fa-history'
+                        };
+
+                        let bgClass = 'secondary';
+                        let iconClass = 'fa-info-circle';
+                        
+                        Object.keys(bgMapping).forEach(key => {
+                            if (notification.type.includes(key)) {
+                                bgClass = bgMapping[key];
+                                iconClass = iconMapping[key];
+                            }
+                        });
+
+                        const notifHtml = `
+                            <form action="/profile/notifications/${notification.id}/read" method="POST" id="read-notif-${notification.id}">
+                                <input type="hidden" name="_token" value="${Laravel.csrfToken}">
+                                <a href="javascript:void(0)" onclick="document.getElementById('read-notif-${notification.id}').submit();" class="dropdown-item py-3 border-bottom h-100 transition-all hover-bg-light animate__animated animate__fadeInDown">
+                                    <div class="media align-items-center">
+                                        <div class="bg-${bgClass} rounded-circle shadow-sm mr-3 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; flex-shrink: 0;">
+                                            <i class="fas ${iconClass} text-white"></i>
+                                        </div>
+                                        <div class="media-body">
+                                            <p class="mb-0 text-dark font-weight-bold small" style="line-height: 1.2;">${notification.title}</p>
+                                            <p class="mb-1 text-muted small mt-1" style="line-height: 1.3;">${notification.message}</p>
+                                            <span class="text-xs text-primary font-weight-600">
+                                                <i class="far fa-clock mr-1"></i>vừa xong
+                                            </span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </form>
+                        `;
+                        dropdownItems.prepend(notifHtml);
+                    }
+
+                    // 5. Show Toast
                     const Toast = Swal.mixin({
                         toast: true,
                         position: 'top-end',
@@ -548,7 +607,7 @@
                     });
 
                     Toast.fire({
-                        icon: notification.type === 'overdue_reminder' ? 'warning' : 'info',
+                        icon: notification.type.includes('Overdue') ? 'warning' : 'info',
                         title: notification.title,
                         text: notification.message
                     });

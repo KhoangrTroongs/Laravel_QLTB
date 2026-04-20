@@ -68,8 +68,10 @@
                             <thead class="bg-light">
                                 <tr class="text-muted small uppercase">
                                     <th class="pl-4">Nhân Viên</th>
-                                    <th>Thiết Bị Yêu Cầu</th>
-                                    <th>Model</th>
+                                    <th>Thiết Bị</th>
+                                    <th>Hạn Trả</th>
+                                    <th>Lý Do Mượn</th>
+                                    <th>Thời Gian</th>
                                     <th class="text-center">Thao Tác</th>
                                 </tr>
                             </thead>
@@ -78,33 +80,59 @@
                                 <tr>
                                     <td class="pl-4 py-3">
                                         <div class="d-flex align-items-center">
-                                            <div class="avatar-sm mr-3 bg-warning text-white rounded-circle d-flex align-items-center justify-content-center font-weight-bold shadow-sm" style="width: 32px; height: 32px;">
-                                                {{ substr($item->user->name, 0, 1) }}
-                                            </div>
+                                            @if($item->user->avatar)
+                                                <img src="{{ str_starts_with($item->user->avatar, 'http') ? $item->user->avatar : asset('storage/' . $item->user->avatar) }}" 
+                                                     class="rounded-circle mr-2 border shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
+                                            @else
+                                                <div class="avatar-sm mr-2 bg-warning text-white rounded-circle d-flex align-items-center justify-content-center font-weight-bold shadow-sm" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                                    {{ substr($item->user->name, 0, 1) }}
+                                                </div>
+                                            @endif
                                             <div>
-                                                <div class="font-weight-bold text-dark">{{ $item->user->name }}</div>
+                                                <div class="font-weight-bold text-dark" style="font-size: 0.9rem;">{{ $item->user->name }}</div>
                                                 <small class="text-muted">{{ $item->user->employee_id }}</small>
                                             </div>
                                         </div>
                                     </td>
-                                    <td><span class="font-weight-bold text-primary">{{ $item->equipment->name }}</span></td>
-                                    <td><span class="text-muted small">{{ $item->equipment->model }}</span></td>
+                                    <td>
+                                        <div class="font-weight-bold text-primary" style="font-size: 0.9rem;">{{ $item->equipment->name }}</div>
+                                        <div class="small text-muted font-italic">{{ $item->equipment->model }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="text-danger font-weight-bold" style="font-size: 0.85rem;">
+                                            <i class="fas fa-calendar-alt mr-1"></i>{{ $item->hantra ? \Carbon\Carbon::parse($item->hantra)->format('d/m/Y') : 'Không có' }}
+                                        </div>
+                                    </td>
+                                    <td style="max-width: 200px;">
+                                        <div class="text-muted small text-truncate" title="{{ $item->description }}">
+                                            <i class="fas fa-pen-nib mr-1"></i>{{ $item->description ?: 'Không có ghi chú' }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="small text-muted">
+                                            <i class="fas fa-clock mr-1"></i>{{ $item->created_at->diffForHumans() }}
+                                        </div>
+                                    </td>
                                     <td class="text-center">
-                                        <div class="btn-group shadow-xs">
+                                        <div class="btn-group btn-group-sm shadow-xs">
                                             <form action="{{ route('equipment-users.approve', $item) }}" method="POST">
                                                 @csrf @method('PATCH')
-                                                <button type="submit" class="btn btn-success btn-sm px-3 shadow-sm font-weight-bold">DUYỆT</button>
+                                                <button type="submit" class="btn btn-success px-3" title="Phê duyệt">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
                                             </form>
                                             <form action="{{ route('equipment-users.reject', $item) }}" method="POST" class="ml-1">
                                                 @csrf @method('PATCH')
-                                                <button type="submit" class="btn btn-danger btn-sm px-3 shadow-sm font-weight-bold">HỦY</button>
+                                                <button type="submit" class="btn btn-danger px-3" title="Từ chối">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center py-5">
+                                    <td colspan="6" class="text-center py-5">
                                         <i class="fas fa-check-circle fa-3x text-success opacity-10 mb-3"></i>
                                         <p class="text-muted mb-0 font-italic">Không có yêu cầu nào đang chờ xử lý.</p>
                                     </td>
@@ -253,36 +281,122 @@
         gradient.addColorStop(0, 'rgba(0, 123, 255, 0.2)');
         gradient.addColorStop(1, 'rgba(0, 123, 255, 0)');
 
-        new Chart(ctxArea, {
-            type: 'line',
-            data: {
-                labels: trendLabels,
-                datasets: [{
-                    label: 'Sản lượng yêu cầu',
-                    data: trendValues,
-                    borderColor: '#007bff',
-                    borderWidth: 3,
-                    backgroundColor: gradient,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#007bff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                maintainAspectRatio: false,
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
-                    x: { grid: { display: false } }
+        if (ctxArea) {
+            new Chart(ctxArea, {
+                type: 'line',
+                data: {
+                    labels: trendLabels,
+                    datasets: [{
+                        label: 'Sản lượng yêu cầu',
+                        data: trendValues,
+                        borderColor: '#007bff',
+                        borderWidth: 3,
+                        backgroundColor: gradient,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#007bff',
+                        pointBorderWidth: 2
+                    }]
                 },
-                plugins: {
-                    legend: { display: false }
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, grid: { borderDash: [5, 5] } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
                 }
-            }
-        });
+            });
+        }
+
+        // Real-time Approval Center Update
+        if (typeof window.Echo !== 'undefined') {
+            window.Echo.private(`App.Models.User.{{ auth()->id() }}`)
+                .notification((notification) => {
+                    if (notification.type === 'App\\Notifications\\NewBorrowRequest') {
+                        // 1. Update Small Box & Card Header Count
+                        const pendingBadges = $('.bg-warning h3, .bg-gradient-warning .card-title .badge');
+                        pendingBadges.each(function() {
+                            let text = $(this).text().replace(/[()]/g, '').trim();
+                            let count = parseInt(text || 0);
+                            $(this).text($(this).is('h3') ? count + 1 : `(${count + 1})`);
+                        });
+
+                        // 2. Add Row to Approval Table
+                        const tableBody = $('.bg-gradient-warning').closest('.card').find('tbody');
+                        const noNotif = tableBody.find('.opacity-10').closest('tr');
+                        if (noNotif.length) noNotif.remove();
+
+                        const avatarHtml = notification.user_avatar 
+                            ? `<img src="${notification.user_avatar.startsWith('http') ? notification.user_avatar : '/storage/' + notification.user_avatar}" class="rounded-circle mr-2 border shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">`
+                            : `<div class="avatar-sm mr-2 bg-warning text-white rounded-circle d-flex align-items-center justify-content-center font-weight-bold shadow-sm" style="width: 32px; height: 32px; font-size: 0.8rem;">${notification.user_name.charAt(0)}</div>`;
+
+                        const approveUrl = `{{ url('equipment-users') }}/${notification.record_id}/approve`;
+                        const rejectUrl = `{{ url('equipment-users') }}/${notification.record_id}/reject`;
+
+                        let hantraFormatted = 'Không có';
+                        if (notification.hantra) {
+                            const date = new Date(notification.hantra);
+                            hantraFormatted = date.toLocaleDateString('vi-VN');
+                        }
+
+                        const newRow = `
+                            <tr class="animate__animated animate__fadeInDown" style="background-color: #fffbeb;">
+                                <td class="pl-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        ${avatarHtml}
+                                        <div>
+                                            <div class="font-weight-bold text-dark" style="font-size: 0.9rem;">${notification.user_name}</div>
+                                            <small class="text-muted">${notification.employee_id}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="font-weight-bold text-primary" style="font-size: 0.9rem;">${notification.equipment_name}</div>
+                                    <div class="small text-muted font-italic">${notification.equipment_model}</div>
+                                </td>
+                                <td>
+                                    <div class="text-danger font-weight-bold" style="font-size: 0.85rem;">
+                                        <i class="fas fa-calendar-alt mr-1"></i>${hantraFormatted}
+                                    </div>
+                                </td>
+                                <td style="max-width: 200px;">
+                                    <div class="text-muted small text-truncate" title="${notification.description || 'Không có ghi chú'}">
+                                        <i class="fas fa-pen-nib mr-1"></i>${notification.description || 'Không có ghi chú'}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small text-muted">
+                                        <i class="fas fa-clock mr-1"></i>vừa xong
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm shadow-xs">
+                                        <form action="${approveUrl}" method="POST">
+                                            <input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH">
+                                            <button type="submit" class="btn btn-success px-3" title="Phê duyệt"><i class="fas fa-check"></i></button>
+                                        </form>
+                                        <form action="${rejectUrl}" method="POST" class="ml-1">
+                                            <input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH">
+                                            <button type="submit" class="btn btn-danger px-3" title="Từ chối"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        tableBody.prepend(newRow);
+
+                        setTimeout(() => {
+                            tableBody.find('tr').first().css('background-color', 'transparent', 'important');
+                        }, 5000);
+                    }
+                });
+        }
     });
 </script>
 @endpush
