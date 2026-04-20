@@ -41,4 +41,9 @@ class Equipment extends Model
             ->withPivot('id', 'ngaymuon', 'hantra', 'ngaytra', 'status', 'description')
             ->withTimestamps();
     }
+
+    public function borrowRecords()
+    {
+        return $this->hasMany(EquipmentUser::class);
+    }
 }

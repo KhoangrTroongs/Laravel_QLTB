@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -59,6 +60,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Equipment::class, 'equipment_users')
             ->withPivot('id', 'ngaymuon', 'hantra', 'ngaytra', 'status', 'description')
             ->withTimestamps();
+    }
+
+    public function borrowRecords()
+    {
+        return $this->hasMany(EquipmentUser::class, 'user_id');
     }
 
     public function roles(): BelongsToMany

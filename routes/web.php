@@ -24,7 +24,9 @@ Route::get('/banned', function () {
 
     return view('banned');
 })->name('banned');
-Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/', function () {
+    return view('api_console');
+});
 Route::get('/thiet-bi/{equipment}', [HomeController::class, 'show'])->name('home.show');
 
 // ─── Tạo phiếu mượn (yêu cầu đăng nhập) ─────────────────────────────────────

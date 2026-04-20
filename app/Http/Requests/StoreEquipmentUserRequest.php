@@ -25,9 +25,9 @@ class StoreEquipmentUserRequest extends FormRequest
         return [
             'user_id' => 'required|exists:users,id',
             'equipment_id' => 'required|exists:equipment,id',
-            'ngaymuon' => 'required|date',
-            'hantra' => 'nullable|date|after_or_equal:ngaymuon',
-            'status' => 'required|in:0,1',
+            'ngaymuon' => 'nullable|date',
+            'hantra' => 'nullable|date|after_or_equal:now',
+            'status' => 'nullable|in:0,1,2,3,4',
             'description' => 'nullable|string|max:1000',
         ];
     }

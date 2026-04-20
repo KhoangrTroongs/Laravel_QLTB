@@ -16,6 +16,10 @@ class CheckRole
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (! $request->user()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+
             return redirect()->route('login');
         }
 
@@ -26,6 +30,10 @@ class CheckRole
             if ($request->user()->hasRole($role)) {
                 return $next($request);
             }
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Forbidden. Insufficient permissions.'], 403);
         }
 
         abort(403, 'Bạn không có quyền truy cập trang này.');
