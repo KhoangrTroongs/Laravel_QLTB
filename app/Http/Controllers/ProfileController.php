@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Profile\ChangePasswordRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Intervention\Image\Encoders\WebpEncoder;
+use Intervention\Image\Laravel\Facades\Image;
 
 class ProfileController extends Controller
 {
@@ -35,11 +36,20 @@ class ProfileController extends Controller
         $validated = $request->validated();
 
         if ($request->hasFile('avatar')) {
-            // Xoá avatar cũ nếu không phải URL ngoài
             if ($user->avatar && ! str_starts_with($user->avatar, 'http')) {
                 Storage::disk('public')->delete($user->avatar);
             }
-            $validated['avatar'] = $request->file('avatar')->store('avatars', 'public');
+
+            $file = $request->file('avatar');
+            $filename = 'avatar_'.$user->id.'_'.time().'.webp';
+            $path = 'avatars/'.$filename;
+
+            $image = Image::decode($file)
+                ->cover(300, 300)
+                ->encode(new WebpEncoder(quality: 80));
+
+            Storage::disk('public')->put($path, (string) $image);
+            $validated['avatar'] = $path;
         }
 
         // Chỉ cập nhật các trường được phép để tránh lỗ hổng Mass Assignment

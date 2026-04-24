@@ -102,17 +102,13 @@
                     </div>
                 </div>
 
-                <div class="card-footer bg-white border-top d-flex justify-content-between">
-                    <div>
-                        <a href="{{ route('equipment.index') }}" class="btn btn-default mr-2">
-                            <i class="fas fa-arrow-left mr-1"></i> Quay lại
-                        </a>
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-warning px-5 shadow-sm font-weight-bold">
-                            <i class="fas fa-save mr-1"></i> Lưu thay đổi
-                        </button>
-                    </div>
+                <div class="card-footer bg-white border-top d-flex justify-content-end">
+                    <a href="{{ route('equipment.index') }}" class="btn btn-default mr-2">
+                        <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-warning px-6 shadow-sm font-weight-bold">
+                        <i class="fas fa-save mr-1"></i> Lưu thay đổi
+                    </button>
                 </div>
             </form>
         </div>

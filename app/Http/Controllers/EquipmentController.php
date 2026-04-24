@@ -9,6 +9,8 @@ use App\Models\Equipment;
 use App\Models\EquipmentUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Encoders\WebpEncoder;
+use Intervention\Image\Laravel\Facades\Image;
 
 class EquipmentController extends Controller
 {
@@ -41,7 +43,7 @@ class EquipmentController extends Controller
 
         if ($sortField === 'availability') {
             // Case when status=1 AND available=1 AND count borrowing=0
-            $query->orderByRaw("(CASE WHEN status = 1 AND available = 1 AND active_borrow_count = 0 THEN 1 ELSE 0 END) " . ($sortDir === 'desc' ? 'desc' : 'asc'));
+            $query->orderByRaw('(CASE WHEN status = 1 AND available = 1 AND active_borrow_count = 0 THEN 1 ELSE 0 END) '.($sortDir === 'desc' ? 'desc' : 'asc'));
         } else {
             $query->orderBy($sortField, $sortDir === 'desc' ? 'desc' : 'asc');
         }
@@ -62,7 +64,16 @@ class EquipmentController extends Controller
     {
         $data = $request->validated();
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('equipment', 'public');
+            $file = $request->file('image');
+            $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'_'.time().'.webp';
+            $path = 'equipment/'.$filename;
+
+            $image = Image::decode($file)
+                ->scale(width: 800)
+                ->encode(new WebpEncoder(quality: 80));
+
+            Storage::disk('public')->put($path, (string) $image);
+            $data['image'] = $path;
         }
 
         // Merge dynamic specs into spec column
@@ -99,7 +110,17 @@ class EquipmentController extends Controller
             if ($equipment->image) {
                 Storage::disk('public')->delete($equipment->image);
             }
-            $data['image'] = $request->file('image')->store('equipment', 'public');
+
+            $file = $request->file('image');
+            $filename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME).'_'.time().'.webp';
+            $path = 'equipment/'.$filename;
+
+            $image = Image::decode($file)
+                ->scale(width: 800)
+                ->encode(new WebpEncoder(quality: 80));
+
+            Storage::disk('public')->put($path, (string) $image);
+            $data['image'] = $path;
         }
 
         // Merge dynamic specs into spec column

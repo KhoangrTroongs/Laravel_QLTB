@@ -10,6 +10,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\TrashController;
 use App\Http\Controllers\UserController;
+use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\EquipmentUser;
 use App\Models\User;
@@ -47,7 +48,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware('auth')->prefix('profile')->name('profile.')->group(function () {
     Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::put('/', [ProfileController::class, 'update'])->name('update');
-    Route::get('/change-password', [ProfileController::class, 'changePassword'])->name('change-password');
+    Route::put('/change-password', [ProfileController::class, 'changePassword'])->name('change-password');
 
     // Thông báo
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -72,8 +73,8 @@ Route::middleware(['auth', 'role:admin,editor'])->group(function () {
         $availableEquipmentCount = Equipment::where('status', 1)->where('available', 1)->count() - $borrowingCount;
 
         // Dữ liệu cho biểu đồ phân bổ loại thiết bị
-        $categoryDistribution = \App\Models\Category::withCount('equipment')->get();
-        
+        $categoryDistribution = Category::withCount('equipment')->get();
+
         $pendingItems = EquipmentUser::with(['user', 'equipment'])
             ->where('status', EquipmentUser::STATUS_PENDING)
             ->latest()
