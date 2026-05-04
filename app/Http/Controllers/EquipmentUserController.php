@@ -8,12 +8,24 @@ use App\Models\Equipment;
 use App\Models\EquipmentUser;
 use App\Models\User;
 use App\Notifications\BorrowRequestResponse;
+use App\Notifications\MissedBorrowRequest;
 use App\Notifications\NewBorrowRequest;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
+/**
+ * Quản lý các phiếu mượn thiết bị (EquipmentUser).
+ * Đây là trung tâm xử lý các yêu cầu mượn, phê duyệt, từ chối và hoàn trả thiết bị.
+ */
 class EquipmentUserController extends Controller
 {
+    /**
+     * Hiển thị danh sách tất cả các phiếu mượn với bộ lọc và tìm kiếm.
+     *
+     * @return View
+     */
     public function index(Request $request)
     {
         $query = EquipmentUser::with([
@@ -74,6 +86,12 @@ class EquipmentUserController extends Controller
         return view('equipment_users.index', compact('records'));
     }
 
+    /**
+     * Quản lý hàng đợi phê duyệt (Queue).
+     * Tự động xử lý các đơn quá hạn chờ duyệt trước khi hiển thị danh sách mới nhất.
+     *
+     * @return View
+     */
     public function queue()
     {
         // 1. Tự động chuyển các đơn quá hạn (chưa duyệt mà đã qua hạn trả) sang Từ chối
@@ -84,19 +102,19 @@ class EquipmentUserController extends Controller
         foreach ($expiredRequests as $request) {
             $request->update([
                 'status' => EquipmentUser::STATUS_REJECTED,
-                'description' => ($request->description ? $request->description . "\n" : "") . "[Hệ thống] Tự động từ chối do quá hạn chờ duyệt."
+                'description' => ($request->description ? $request->description."\n" : '').'[Hệ thống] Tự động từ chối do quá hạn chờ duyệt.',
             ]);
 
             // Thông báo cho người dùng
             $request->user->notify(new BorrowRequestResponse($request));
 
             // Thông báo cho Admin
-            $admins = User::whereHas('roles', function($q) {
+            $admins = User::whereHas('roles', function ($q) {
                 $q->whereIn('name', ['admin', 'editor']);
             })->get();
-            
+
             foreach ($admins as $admin) {
-                $admin->notify(new \App\Notifications\MissedBorrowRequest($request));
+                $admin->notify(new MissedBorrowRequest($request));
             }
         }
 
@@ -109,6 +127,11 @@ class EquipmentUserController extends Controller
         return view('equipment_users.queue', compact('queue'));
     }
 
+    /**
+     * Hiển thị form tạo phiếu mượn mới (cho Admin/Editor tạo hộ).
+     *
+     * @return View
+     */
     public function create()
     {
         $users = User::where('status', 1)->where('available', 1)->orderBy('name')->get();
@@ -123,12 +146,17 @@ class EquipmentUserController extends Controller
         return view('equipment_users.create', compact('users', 'equipment'));
     }
 
+    /**
+     * Lưu phiếu mượn mới và thông báo cho ban quản trị.
+     *
+     * @return RedirectResponse
+     */
     public function store(StoreEquipmentUserRequest $request)
     {
         $borrowRequest = EquipmentUser::create($request->validated());
 
         // Notify Admins
-        $admins = User::whereHas('roles', function($q) {
+        $admins = User::whereHas('roles', function ($q) {
             $q->whereIn('name', ['admin', 'editor']);
         })->get();
         foreach ($admins as $admin) {
@@ -174,6 +202,12 @@ class EquipmentUserController extends Controller
             ->with('success', 'Phiếu mượn đã được cập nhật thành công!');
     }
 
+    /**
+     * Phê duyệt một yêu cầu mượn thiết bị.
+     * Kiểm tra tính khả dụng của thiết bị trước khi duyệt.
+     *
+     * @return RedirectResponse
+     */
     public function approve(EquipmentUser $equipmentUser)
     {
         if ($equipmentUser->status !== EquipmentUser::STATUS_PENDING) {
@@ -201,6 +235,11 @@ class EquipmentUserController extends Controller
         return back()->with('success', 'Đã duyệt yêu cầu mượn thiết bị! Hạn trả: '.Carbon::parse($equipmentUser->hantra ?? now()->addDays(14))->format('d/m/Y'));
     }
 
+    /**
+     * Từ chối một yêu cầu mượn thiết bị.
+     *
+     * @return RedirectResponse
+     */
     public function reject(EquipmentUser $equipmentUser)
     {
         if ($equipmentUser->status !== EquipmentUser::STATUS_PENDING) {
@@ -217,6 +256,12 @@ class EquipmentUserController extends Controller
         return back()->with('success', 'Đã từ chối yêu cầu mượn thiết bị!');
     }
 
+    /**
+     * Xác nhận hoàn trả thiết bị.
+     * Cập nhật trạng thái phiếu mượn và ngày trả thực tế.
+     *
+     * @return RedirectResponse
+     */
     public function return(EquipmentUser $equipmentUser)
     {
         if ($equipmentUser->status !== EquipmentUser::STATUS_BORROWING) {
@@ -249,6 +294,11 @@ class EquipmentUserController extends Controller
 
     /**
      * Report: list of equipment borrowed by each user in a year.
+     */
+    /**
+     * Xuất báo cáo thống kê tình hình mượn thiết bị theo năm.
+     *
+     * @return View
      */
     public function report(Request $request)
     {

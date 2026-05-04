@@ -14,11 +14,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 
+/**
+ * Controller xử lý các hoạt động ở trang giao diện người dùng (User Interface).
+ * Cho phép xem danh sách thiết bị rảnh, xem chi tiết và gửi yêu cầu mượn.
+ */
 class HomeController extends Controller
 {
     /**
-     * Trang chủ: danh sách thiết bị còn có thể cho mượn.
-     * Ai cũng có thể xem, nhưng chỉ user đã đăng nhập mới tạo được phiếu mượn.
+     * Hiển thị danh sách thiết bị đang rảnh (status=1 và available=1).
+     * Có chức năng tìm kiếm và lọc theo danh mục.
      */
     public function index(Request $request): View
     {
@@ -81,7 +85,8 @@ class HomeController extends Controller
     }
 
     /**
-     * Lưu phiếu mượn thiết bị.
+     * Xử lý lưu yêu cầu mượn thiết bị mới từ người dùng.
+     * Sau khi lưu, hệ thống sẽ gửi thông báo (Notification) cho ban quản trị.
      */
     public function storeBorrow(Request $request, Equipment $equipment): RedirectResponse
     {

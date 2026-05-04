@@ -9,6 +9,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Model đại diện cho người dùng/nhân viên trong hệ thống.
+ * Tích hợp hệ thống phân quyền (RBAC) và Soft Deletes.
+ *
+ * @property string $name Họ tên
+ * @property string $email Email đăng nhập
+ * @property string $employee_id Mã nhân viên
+ * @property string $phone Số điện thoại
+ * @property int $status Trạng thái tài khoản (1: Hoạt động, 0: Khóa)
+ */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -29,6 +39,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'avatar',
+        'google_id',
     ];
 
     /**
@@ -54,6 +65,9 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Quan hệ: Một người dùng có thể mượn nhiều thiết bị.
+     */
     public function equipments(): BelongsToMany
     {
         return $this->belongsToMany(Equipment::class, 'equipment_users')
@@ -61,6 +75,9 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    /**
+     * Quan hệ: Một người dùng có thể có nhiều vai trò (admin, editor, etc.).
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class);

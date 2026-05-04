@@ -10,10 +10,10 @@
 
 <th {{ $attributes->merge(['class' => 'py-3']) }}>
     <a href="{{ request()->fullUrlWithQuery(['sort' => $field, 'direction' => $nextDir]) }}" 
-       class="d-flex align-items-center text-primary font-weight-bold text-decoration-none shadow-none"
+       class="d-flex align-items-center text-primary fw-bold text-decoration-none shadow-none"
        style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
         {{ $title }}
-        <span class="ml-2">
+        <span class="ms-2">
             <i class="fas {{ $icon }}" style="font-size: 0.9rem;"></i>
         </span>
     </a>

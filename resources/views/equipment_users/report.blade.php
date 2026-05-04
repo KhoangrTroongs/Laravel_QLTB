@@ -12,13 +12,13 @@
 <div class="card card-white shadow-sm border-0">
     <div class="card-header bg-white py-3">
         <div class="d-flex justify-content-between align-items-center">
-            <h3 class="card-title text-dark font-weight-bold">
-                <i class="fas fa-file-invoice-dollar mr-2 text-danger"></i>Thống Kê Mượn Thiết Bị Trong Năm {{ $year }}
+            <h3 class="card-title text-dark fw-bold">
+                <i class="fas fa-file-invoice-dollar me-2 text-danger"></i>Thống Kê Mượn Thiết Bị Trong Năm {{ $year }}
             </h3>
             <form action="{{ route('equipment-users.report') }}" method="GET" class="form-inline">
                 <div class="input-group input-group-sm border rounded-pill px-2 bg-light">
-                    <span class="input-group-text bg-transparent border-0 text-muted small font-weight-bold">CHỌN NĂM:</span>
-                    <select name="year" class="form-control bg-transparent border-0 font-weight-bold text-primary" onchange="this.form.submit()">
+                    <span class="input-group-text bg-transparent border-0 text-muted small fw-bold">CHỌN NĂM:</span>
+                    <select name="year" class="form-control bg-transparent border-0 fw-bold text-primary" onchange="this.form.submit()">
                         @for($i = date('Y'); $i >= 2024; $i--)
                             <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>{{ $i }}</option>
                         @endfor
@@ -31,7 +31,7 @@
         @forelse($reportData as $data)
             <div class="user-report-card mb-5 bg-white border rounded-lg shadow-sm overflow-hidden">
                 <div class="card-user-header p-3 bg-light border-bottom d-flex align-items-center">
-                    <div class="avatar-wrapper mr-3">
+                    <div class="avatar-wrapper me-3">
                         @if($data['user']->avatar)
                             <img src="{{ str_starts_with($data['user']->avatar, 'http') ? $data['user']->avatar : asset('storage/' . $data['user']->avatar) }}" 
                                  class="rounded-circle border-white shadow-sm" style="width: 50px; height: 50px; border-width: 3px !important; object-fit: cover;">
@@ -41,12 +41,12 @@
                         @endif
                     </div>
                     <div>
-                        <h5 class="mb-0 font-weight-bold text-dark">{{ $data['user']->name }}</h5>
-                        <p class="mb-0 text-muted small"><i class="fas fa-id-badge mr-1"></i>{{ $data['user']->employee_id }} — <i class="fas fa-envelope mr-1"></i>{{ $data['user']->email }}</p>
+                        <h5 class="mb-0 fw-bold text-dark">{{ $data['user']->name }}</h5>
+                        <p class="mb-0 text-muted small"><i class="fas fa-id-badge me-1"></i>{{ $data['user']->employee_id }} — <i class="fas fa-envelope me-1"></i>{{ $data['user']->email }}</p>
                     </div>
-                    <div class="ml-auto">
-                        <span class="badge badge-primary-soft px-3 py-2" style="background: rgba(0,123,255,0.1); color: #007bff; border-radius: 20px;">
-                            <i class="fas fa-box-open mr-1"></i>{{ count($data['items']) }} Thiết bị đã mượn
+                    <div class="ms-auto">
+                        <span class="badge text-bg-primary-soft px-3 py-2" style="background: rgba(0,123,255,0.1); color: #007bff; border-radius: 20px;">
+                            <i class="fas fa-box-open me-1"></i>{{ count($data['items']) }} Thiết bị đã mượn
                         </span>
                     </div>
                 </div>
@@ -64,29 +64,29 @@
                         <tbody>
                             @foreach($data['items'] as $index => $item)
                             <tr class="align-middle">
-                                <td class="text-center font-weight-bold text-muted">{{ $index + 1 }}</td>
+                                <td class="text-center fw-bold text-muted">{{ $index + 1 }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <div class="icon-sm mr-3 text-info"><i class="fas fa-laptop"></i></div>
+                                        <div class="icon-sm me-3 text-info"><i class="fas fa-laptop"></i></div>
                                         <div>
-                                            <div class="font-weight-bold text-dark">{{ $item['equipment']->name }}</div>
+                                            <div class="fw-bold text-dark">{{ $item['equipment']->name }}</div>
                                             <small class="text-muted">{{ $item['equipment']->model }}</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="text-center">
-                                    <span class="badge badge-info-soft" style="background: rgba(23,162,184,0.1); color: #17a2b8;">
+                                    <span class="badge text-bg-info-soft" style="background: rgba(23,162,184,0.1); color: #17a2b8;">
                                         {{ $item['count'] }} lần
                                     </span>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center small text-muted">
                                         <div class="px-2 py-1 bg-light rounded shadow-xs">
-                                            <i class="far fa-calendar-check mr-1 text-success"></i>{{ \Carbon\Carbon::parse($item['from'])->format('d/m/Y') }}
+                                            <i class="far fa-calendar-check me-1 text-success"></i>{{ \Carbon\Carbon::parse($item['from'])->format('d/m/Y') }}
                                         </div>
                                         <i class="fas fa-caret-right mx-2 text-muted opacity-50"></i>
                                         <div class="px-2 py-1 bg-light rounded shadow-xs">
-                                            <i class="far fa-calendar-times mr-1 text-danger"></i>{{ \Carbon\Carbon::parse($item['to'])->format('d/m/Y') }}
+                                            <i class="far fa-calendar-times me-1 text-danger"></i>{{ \Carbon\Carbon::parse($item['to'])->format('d/m/Y') }}
                                         </div>
                                     </div>
                                 </td>

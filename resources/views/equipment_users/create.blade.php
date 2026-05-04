@@ -9,11 +9,11 @@
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row g-3">
     <div class="col-md-8">
         <div class="card card-primary card-outline">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-handshake mr-2"></i>Form Mượn Thiết Bị</h3>
+                <h3 class="card-title"><i class="fas fa-handshake me-2"></i>Form Mượn Thiết Bị</h3>
             </div>
             <form action="{{ route('equipment-users.store') }}" method="POST">
                 @csrf
@@ -58,7 +58,7 @@
                         @enderror
                     </div>
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="ngaymuon">Ngày Mượn <span class="text-danger">*</span></label>
@@ -107,10 +107,10 @@
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save mr-1"></i>Tạo Phiếu Mượn
+                        <i class="fas fa-save me-1"></i>Tạo Phiếu Mượn
                     </button>
-                    <a href="{{ route('equipment-users.index') }}" class="btn btn-default ml-2">
-                        <i class="fas fa-arrow-left mr-1"></i>Quay Lại
+                    <a href="{{ route('equipment-users.index') }}" class="btn btn-default ms-2">
+                        <i class="fas fa-arrow-left me-1"></i>Quay Lại
                     </a>
                 </div>
             </form>
@@ -119,14 +119,14 @@
     <div class="col-md-4">
         <div class="card card-info card-outline">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-info-circle mr-2"></i>Hướng Dẫn</h3>
+                <h3 class="card-title"><i class="fas fa-info-circle me-2"></i>Hướng Dẫn</h3>
             </div>
             <div class="card-body">
                 <p>Chỉ hiển thị nhân viên <strong>đang làm việc</strong> và thiết bị <strong>đang hoạt động</strong>.</p>
                 <p><strong>Trạng thái:</strong></p>
                 <ul>
-                    <li><span class="badge badge-warning">Đang mượn</span> - NV chưa trả</li>
-                    <li><span class="badge badge-success">Đã trả</span> - NV đã hoàn trả</li>
+                    <li><span class="badge text-bg-warning">Đang mượn</span> - NV chưa trả</li>
+                    <li><span class="badge text-bg-success">Đã trả</span> - NV đã hoàn trả</li>
                 </ul>
             </div>
         </div>

@@ -6,6 +6,10 @@ use Database\Factories\EquipmentUserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Model bảng trung gian cho việc mượn trả thiết bị.
+ * Lưu trữ thông tin chi tiết về mỗi lượt mượn: ngày mượn, hạn trả, trạng thái.
+ */
 class EquipmentUser extends Model
 {
     /** @use HasFactory<EquipmentUserFactory> */
@@ -29,11 +33,17 @@ class EquipmentUser extends Model
         'description',
     ];
 
+    /**
+     * Quan hệ ngược: Phiếu mượn thuộc về một người dùng.
+     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Quan hệ ngược: Phiếu mượn thuộc về một thiết bị.
+     */
     public function equipment()
     {
         return $this->belongsTo(Equipment::class);

@@ -9,11 +9,11 @@
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row g-3">
     <div class="col-md-8">
         <div class="card card-warning card-outline">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-user-edit mr-2"></i>Sửa: {{ $user->name }}</h3>
+                <h3 class="card-title"><i class="fas fa-user-edit me-2"></i>Sửa: {{ $user->name }}</h3>
             </div>
             <form action="{{ route('users.update', $user) }}" method="POST" enctype="multipart/form-data">
                 @csrf @method('PUT')
@@ -49,7 +49,7 @@
                         </div>
                     @endif
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="employee_id">Mã Nhân Viên <span class="text-danger">*</span></label>
@@ -74,7 +74,7 @@
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="email">Email <span class="text-danger">*</span></label>
@@ -109,7 +109,7 @@
                         @enderror
                     </div>
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label for="password">Mật Khẩu Mới <small class="text-muted">(để trống nếu không đổi)</small></label>
@@ -130,7 +130,7 @@
                                 </select>
                                 @if($user->employee_id === 'ADMIN001')
                                     <input type="hidden" name="status" value="1">
-                                    <small class="text-info"><i class="fas fa-info-circle mr-1"></i>Tài khoản Admin chính luôn ở trạng thái Hoạt động.</small>
+                                    <small class="text-info"><i class="fas fa-info-circle me-1"></i>Tài khoản Admin chính luôn ở trạng thái Hoạt động.</small>
                                 @endif
                                 @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -141,14 +141,14 @@
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-warning shadow-sm">
-                        <i class="fas fa-save mr-1"></i>Cập Nhật Thông Tin
+                        <i class="fas fa-save me-1"></i>Cập Nhật Thông Tin
                     </button>
-                    <a href="{{ route('users.index') }}" class="btn btn-default ml-2 shadow-sm">
-                        <i class="fas fa-arrow-left mr-1"></i>Quay Lại
+                    <a href="{{ route('users.index') }}" class="btn btn-default ms-2 shadow-sm">
+                        <i class="fas fa-arrow-left me-1"></i>Quay Lại
                     </a>
                     @if($user->employee_id !== 'ADMIN001')
-                        <button type="button" class="btn btn-danger float-right shadow-sm" onclick="$('#delete-form').submit()">
-                            <i class="fas fa-trash mr-1"></i>Xóa Nhân Viên
+                        <button type="button" class="btn btn-danger float-end shadow-sm" onclick="$('#delete-form').submit()">
+                            <i class="fas fa-trash me-1"></i>Xóa Nhân Viên
                         </button>
                     @endif
                 </div>
@@ -161,7 +161,7 @@
     <div class="col-md-4">
         <div class="card card-secondary card-outline">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-id-card mr-2"></i>Thông Tin Hiện Tại</h3>
+                <h3 class="card-title"><i class="fas fa-id-card me-2"></i>Thông Tin Hiện Tại</h3>
             </div>
             <div class="card-body">
                 <table class="table table-sm table-borderless">
@@ -173,9 +173,9 @@
                         <th>Trạng thái:</th>
                         <td>
                             @if($user->status)
-                                <span class="badge badge-success">Đang làm</span>
+                                <span class="badge text-bg-success">Đang làm</span>
                             @else
-                                <span class="badge badge-secondary">Đã nghỉ</span>
+                                <span class="badge text-bg-secondary">Đã nghỉ</span>
                             @endif
                         </td>
                     </tr>

@@ -9,21 +9,21 @@
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row g-3">
     <div class="col-12">
-        <div class="card card-indigo card-outline shadow-sm" style="border-radius: 12px;">
-            <div class="card-header bg-white">
-                <h3 class="card-title font-weight-bold">
-                    <i class="fas fa-hourglass-half mr-2 text-indigo"></i>Phiếu mượn đang chờ xử lý 
-                    <span class="badge badge-indigo border ml-2">{{ $queue->count() }}</span>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold">
+                    <i class="fas fa-hourglass-half me-2 text-indigo"></i>Phiếu mượn đang chờ xử lý 
+                    <span class="badge text-bg-primary border ms-2">{{ $queue->count() }}</span>
                 </h3>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light text-muted small text-uppercase font-weight-bold">
+                    <table class="table table-bordered table-striped align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase fw-bold">
                             <tr>
-                                <th class="pl-4">#</th>
+                                <th class="ps-4">#</th>
                                 <th>Nhân Viên</th>
                                 <th>Thiết Bị</th>
                                 <th>Thời Gian Yêu Cầu</th>
@@ -34,53 +34,45 @@
                         <tbody>
                             @forelse($queue as $item)
                             <tr>
-                                <td class="pl-4 text-muted">{{ $loop->iteration }}</td>
+                                <td class="ps-4 text-muted">{{ $loop->iteration }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         @if($item->user->avatar)
                                             <img src="{{ str_starts_with($item->user->avatar, 'http') ? $item->user->avatar : asset('storage/' . $item->user->avatar) }}" 
-                                                 class="rounded-circle mr-2 border" style="width: 32px; height: 32px; object-fit: cover;">
+                                                 class="rounded-circle me-2 border" style="width: 32px; height: 32px; object-fit: cover;">
                                         @else
                                             <img src="https://ui-avatars.com/api/?name={{ urlencode($item->user->name) }}&background=6610f2&color=fff" 
-                                                 class="rounded-circle mr-2 border" style="width: 32px; height: 32px;">
+                                                 class="rounded-circle me-2 border" style="width: 32px; height: 32px;">
                                         @endif
                                         <div>
-                                            <div class="font-weight-bold text-dark">{{ $item->user->name }}</div>
+                                            <div class="fw-bold">{{ $item->user->name }}</div>
                                             <div class="small text-muted">{{ $item->user->employee_id }}</div>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="font-weight-600 text-dark">{{ $item->equipment->name }}</div>
-                                    <div class="small text-indigo font-weight-bold">{{ $item->equipment->model }}</div>
+                                    <div class="fw-semibold">{{ $item->equipment->name }}</div>
+                                    <div class="small text-indigo fw-bold">{{ $item->equipment->model }}</div>
                                 </td>
                                 <td>
-                                    <div class="text-dark"><i class="far fa-calendar-alt mr-1"></i>{{ \Carbon\Carbon::parse($item->ngaymuon)->format('d/m/Y') }}</div>
-                                    <div class="small text-muted"><i class="far fa-clock mr-1"></i>{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</div>
+                                    <div><i class="far fa-calendar-alt me-1"></i>{{ \Carbon\Carbon::parse($item->ngaymuon)->format('d/m/Y') }}</div>
+                                    <div class="small text-muted"><i class="far fa-clock me-1"></i>{{ \Carbon\Carbon::parse($item->created_at)->diffForHumans() }}</div>
                                 </td>
                                 <td>
-                                    <div class="text-danger font-weight-bold">
-                                        <i class="fas fa-calendar-check mr-1"></i>{{ \Carbon\Carbon::parse($item->hantra)->format('d/m/Y') }}
+                                    <div class="text-danger fw-bold">
+                                        <i class="fas fa-calendar-check me-1"></i>{{ \Carbon\Carbon::parse($item->hantra)->format('d/m/Y') }}
                                     </div>
                                     @if(\Carbon\Carbon::parse($item->hantra)->isPast())
-                                        <span class="badge badge-danger">Sắp quá hạn</span>
+                                        <span class="badge text-bg-danger">Sắp quá hạn</span>
                                     @endif
                                 </td>
-                                <td class="text-center">
+                                <td class="align-middle text-center">
                                     <div class="btn-group">
-                                        <form action="{{ route('equipment-users.approve', $item) }}" method="POST" class="d-inline">
-                                            @csrf @method('PATCH')
-                                            <button type="submit" class="btn btn-success btn-sm px-3 mr-1 shadow-xs">
-                                                <i class="fas fa-check mr-1"></i> Duyệt
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('equipment-users.reject', $item) }}" method="POST" class="d-inline">
-                                            @csrf @method('PATCH')
-                                            <button type="submit" class="btn btn-danger btn-sm px-3 shadow-xs">
-                                                <i class="fas fa-times mr-1"></i> Từ chối
-                                            </button>
-                                        </form>
+                                        <button type="submit" form="approve-form-{{ $item->id }}" class="btn btn-success" title="Duyệt"><i class="fas fa-check"></i> Duyệt</button>
+                                        <button type="submit" form="reject-form-{{ $item->id }}" class="btn btn-danger" title="Từ chối"><i class="fas fa-times"></i> Từ chối</button>
                                     </div>
+                                    <form id="approve-form-{{ $item->id }}" action="{{ route('equipment-users.approve', $item) }}" method="POST" class="d-none">@csrf @method('PATCH')</form>
+                                    <form id="reject-form-{{ $item->id }}" action="{{ route('equipment-users.reject', $item) }}" method="POST" class="d-none">@csrf @method('PATCH')</form>
                                 </td>
                             </tr>
                             @empty
@@ -98,9 +90,9 @@
                     </table>
                 </div>
             </div>
-            <div class="card-footer bg-white text-right">
-                 <p class="text-muted small mb-0 font-italic">
-                    <i class="fas fa-info-circle mr-1"></i> Các yêu cầu có hạn trả nhỏ hơn ngày hiện tại sẽ được hệ thống dọn dẹp khi bạn tải trang này.
+            <div class="card-footer text-end">
+                 <p class="text-muted small mb-0 fst-italic">
+                    <i class="fas fa-info-circle me-1"></i> Các yêu cầu có hạn trả nhỏ hơn ngày hiện tại sẽ được hệ thống dọn dẹp khi bạn tải trang này.
                  </p>
             </div>
         </div>
@@ -142,44 +134,36 @@ $(document).ready(function() {
                     
                     const newRow = `
                         <tr class="animate__animated animate__fadeInDown" style="background-color: #f5f3ff;">
-                            <td class="pl-4 text-muted">${rowCount}</td>
+                            <td class="ps-4 text-muted">${rowCount}</td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <img src="${avatarUrl}" class="rounded-circle mr-2 border" style="width: 32px; height: 32px; object-fit: cover;">
+                                    <img src="${avatarUrl}" class="rounded-circle me-2 border" style="width: 32px; height: 32px; object-fit: cover;">
                                     <div>
-                                        <div class="font-weight-bold text-dark">${notification.user_name}</div>
+                                        <div class="fw-bold text-dark">${notification.user_name}</div>
                                         <div class="small text-muted">${notification.employee_id}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <div class="font-weight-600 text-dark">${notification.equipment_name}</div>
-                                <div class="small text-indigo font-weight-bold">${notification.equipment_model}</div>
+                                <div class="fw-semibold text-dark">${notification.equipment_name}</div>
+                                <div class="small text-indigo fw-bold">${notification.equipment_model}</div>
                             </td>
                             <td>
-                                <div class="text-dark"><i class="far fa-calendar-alt mr-1"></i>Hôm nay</div>
-                                <div class="small text-muted"><i class="far fa-clock mr-1"></i>vừa xong</div>
+                                <div class="text-dark"><i class="far fa-calendar-alt me-1"></i>Hôm nay</div>
+                                <div class="small text-muted"><i class="far fa-clock me-1"></i>vừa xong</div>
                             </td>
                             <td>
-                                <div class="text-danger font-weight-bold">
-                                    <i class="fas fa-calendar-check mr-1"></i>${hantraFormatted}
+                                <div class="text-danger fw-bold">
+                                    <i class="fas fa-calendar-check me-1"></i>${hantraFormatted}
                                 </div>
                             </td>
-                            <td class="text-center">
+                            <td class="align-middle text-center">
                                 <div class="btn-group">
-                                    <form action="${approveUrl}" method="POST" class="d-inline">
-                                        <input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH">
-                                        <button type="submit" class="btn btn-success btn-sm px-3 mr-1 shadow-xs">
-                                            <i class="fas fa-check mr-1"></i> Duyệt
-                                        </button>
-                                    </form>
-                                    <form action="${rejectUrl}" method="POST" class="d-inline">
-                                        <input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH">
-                                        <button type="submit" class="btn btn-danger btn-sm px-3 shadow-xs">
-                                            <i class="fas fa-times mr-1"></i> Từ chối
-                                        </button>
-                                    </form>
+                                    <button type="submit" form="approve-form-${notification.record_id}" class="btn btn-success" title="Duyệt"><i class="fas fa-check"></i> Duyệt</button>
+                                    <button type="submit" form="reject-form-${notification.record_id}" class="btn btn-danger" title="Từ chối"><i class="fas fa-times"></i> Từ chối</button>
                                 </div>
+                                <form id="approve-form-${notification.record_id}" action="${approveUrl}" method="POST" class="d-none"><input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH"></form>
+                                <form id="reject-form-${notification.record_id}" action="${rejectUrl}" method="POST" class="d-none"><input type="hidden" name="_token" value="${Laravel.csrfToken}"><input type="hidden" name="_method" value="PATCH"></form>
                             </td>
                         </tr>
                     `;

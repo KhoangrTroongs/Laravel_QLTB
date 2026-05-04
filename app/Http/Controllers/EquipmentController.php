@@ -7,13 +7,25 @@ use App\Http\Requests\UpdateEquipmentRequest;
 use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\EquipmentUser;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
 use Intervention\Image\Encoders\WebpEncoder;
 use Intervention\Image\Laravel\Facades\Image;
 
+/**
+ * Quản lý các hoạt động CRUD cho thiết bị.
+ * Bao gồm việc liệt kê, tạo mới, cập nhật, xem chi tiết và xóa thiết bị.
+ * Có tích hợp xử lý hình ảnh (WebP) và lọc/sắp xếp nâng cao.
+ */
 class EquipmentController extends Controller
 {
+    /**
+     * Hiển thị danh sách thiết bị với khả năng tìm kiếm, lọc và sắp xếp.
+     *
+     * @return View
+     */
     public function index(Request $request)
     {
         $query = Equipment::with('category')->withCount(['users as active_borrow_count' => function ($q) {
@@ -53,6 +65,11 @@ class EquipmentController extends Controller
         return view('equipment.index', compact('equipment'));
     }
 
+    /**
+     * Hiển thị form tạo mới thiết bị.
+     *
+     * @return View
+     */
     public function create()
     {
         $categories = Category::all();
@@ -60,6 +77,12 @@ class EquipmentController extends Controller
         return view('equipment.create', compact('categories'));
     }
 
+    /**
+     * Lưu thiết bị mới vào cơ sở dữ liệu.
+     * Xử lý tải lên hình ảnh, chuyển đổi sang định dạng WebP để tối ưu dung lượng.
+     *
+     * @return RedirectResponse
+     */
     public function store(StoreEquipmentRequest $request)
     {
         $data = $request->validated();
@@ -87,6 +110,12 @@ class EquipmentController extends Controller
             ->with('success', 'Thiết bị đã được thêm thành công!');
     }
 
+    /**
+     * Hiển thị thông tin chi tiết một thiết bị cụ thể.
+     * Bao gồm lịch sử mượn trả của thiết bị đó.
+     *
+     * @return View
+     */
     public function show(Equipment $equipment)
     {
         $equipment->load(['category', 'users' => function ($q) {
@@ -96,6 +125,11 @@ class EquipmentController extends Controller
         return view('equipment.show', compact('equipment'));
     }
 
+    /**
+     * Hiển thị form chỉnh sửa thông tin thiết bị.
+     *
+     * @return View
+     */
     public function edit(Equipment $equipment)
     {
         $categories = Category::all();
@@ -103,6 +137,12 @@ class EquipmentController extends Controller
         return view('equipment.edit', compact('equipment', 'categories'));
     }
 
+    /**
+     * Cập nhật thông tin thiết bị trong cơ sở dữ liệu.
+     * Xử lý cập nhật hình ảnh (xóa ảnh cũ nếu có ảnh mới).
+     *
+     * @return RedirectResponse
+     */
     public function update(UpdateEquipmentRequest $request, Equipment $equipment)
     {
         $data = $request->validated();
@@ -134,6 +174,12 @@ class EquipmentController extends Controller
             ->with('success', 'Thiết bị đã được cập nhật thành công!');
     }
 
+    /**
+     * Xóa thiết bị (Xóa mềm - Soft Delete).
+     * Ràng buộc: Không thể xóa thiết bị đang trong trạng thái "Đang mượn".
+     *
+     * @return RedirectResponse
+     */
     public function destroy(Equipment $equipment)
     {
         // Kiểm tra xem thiết bị có đang được mượn không

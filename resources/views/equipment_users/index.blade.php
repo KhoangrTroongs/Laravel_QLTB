@@ -8,28 +8,28 @@
 @endsection
 
 @section('content')
-<div class="card card-primary card-outline">
+<div class="card">
     <div class="card-header">
-        <h3 class="card-title"><i class="fas fa-handshake mr-2"></i>Danh Sách Mượn Thiết Bị</h3>
+        <h3 class="card-title"><i class="fas fa-handshake me-2"></i>Danh Sách Mượn Thiết Bị</h3>
         <div class="card-tools">
-            <a href="{{ route('equipment-users.create') }}" class="btn btn-primary btn-sm mr-1 shadow-sm">
-                <i class="fas fa-plus mr-1"></i>Tạo Phiếu Mượn
+            <a href="{{ route('equipment-users.create') }}" class="btn btn-primary btn-sm me-1 shadow-sm">
+                <i class="fas fa-plus me-1"></i>Tạo Phiếu Mượn
             </a>
             <a href="{{ route('equipment-users.report') }}" class="btn btn-info btn-sm shadow-sm">
-                <i class="fas fa-chart-bar mr-1"></i>Báo Cáo
+                <i class="fas fa-chart-bar me-1"></i>Báo Cáo
             </a>
         </div>
     </div>
     <div class="card-body">
         <!-- Search & Filter -->
         <form method="GET" action="{{ route('equipment-users.index') }}" class="mb-4">
-            <div class="row align-items-end">
+            <div class="row align-items-end g-3">
                 <div class="col-md-3">
-                    <label class="small font-weight-bold text-muted">TÌM KIẾM</label>
+                    <label class="small fw-bold text-muted">TÌM KIẾM</label>
                     <input type="text" name="search" class="form-control shadow-sm" placeholder="Tên NV, thiết bị..." value="{{ request('search') }}">
                 </div>
                 <div class="col-md-2">
-                    <label class="small font-weight-bold text-muted">TRẠNG THÁI</label>
+                    <label class="small fw-bold text-muted">TRẠNG THÁI</label>
                     <select name="status" class="form-control shadow-sm">
                         <option value="">Tất cả</option>
                         <option value="{{ \App\Models\EquipmentUser::STATUS_PENDING }}" {{ request('status') === (string)\App\Models\EquipmentUser::STATUS_PENDING ? 'selected' : '' }}>Chờ duyệt</option>
@@ -39,18 +39,18 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label class="small font-weight-bold text-muted">LỌC NHANH</label>
+                    <label class="small fw-bold text-muted d-block">LỌC NHANH</label>
                     <a href="{{ route('equipment-users.index', array_merge(request()->except('overdue'), ['overdue' => request('overdue') == 1 ? 0 : 1])) }}" 
-                       class="btn {{ request('overdue') == 1 ? 'btn-danger' : 'btn-outline-danger' }} btn-block shadow-sm">
-                        <i class="fas fa-exclamation-triangle mr-1"></i>Trễ hạn
+                       class="btn {{ request('overdue') == 1 ? 'btn-danger' : 'btn-outline-danger' }} w-100 shadow-sm">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Trễ hạn
                     </a>
                 </div>
                 <div class="col-md-2">
-                    <label class="small font-weight-bold text-muted">TỪ NGÀY</label>
+                    <label class="small fw-bold text-muted">TỪ NGÀY</label>
                     <input type="date" name="from_date" class="form-control shadow-sm" value="{{ request('from_date') }}">
                 </div>
                 <div class="col-md-2">
-                    <label class="small font-weight-bold text-muted">ĐẾN NGÀY</label>
+                    <label class="small fw-bold text-muted">ĐẾN NGÀY</label>
                     <input type="date" name="to_date" class="form-control shadow-sm" value="{{ request('to_date') }}">
                 </div>
                 <div class="col-md-1">
@@ -66,7 +66,8 @@
             </div>
         </form>
 
-        <table class="table table-hover" id="borrow-requests-table">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped" id="borrow-requests-table">
             <thead>
                 <tr>
                     <x-sortable-header field="id" title="#" width="80" class="text-center" />
@@ -75,7 +76,7 @@
                     <x-sortable-header field="date" title="Thời Gian" />
                     <x-sortable-header field="status" title="Trạng Thái" />
                     <th width="120" class="text-center py-3">
-                        <span class="text-muted font-weight-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                        <span class="text-muted fw-bold" style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
                             Thao Tác
                         </span>
                     </th>
@@ -84,23 +85,23 @@
             <tbody>
                 @forelse($records as $record)
                 <tr id="record-row-{{ $record->id }}">
-                    <td class="text-center text-muted font-weight-bold">{{ $record->id }}</td>
+                    <td class="text-center fw-bold">{{ $record->id }}</td>
                     <td>
                         <div class="d-flex align-items-center">
                             @if($record->user && $record->user->avatar)
                                 <img src="{{ str_starts_with($record->user->avatar, 'http') ? $record->user->avatar : asset('storage/' . $record->user->avatar) }}" 
-                                     class="rounded-circle mr-2 border" 
+                                     class="rounded-circle me-2 border" 
                                      style="width: 35px; height: 35px; object-fit: cover;">
                             @else
                                 <img src="https://ui-avatars.com/api/?name={{ urlencode($record->user->name ?? 'N/A') }}&background=random" 
-                                     class="rounded-circle mr-2 border" 
+                                     class="rounded-circle me-2 border" 
                                      style="width: 35px; height: 35px; object-fit: cover;">
                             @endif
                             <div>
-                                <div class="font-weight-bold text-dark">
+                                <div class="fw-bold">
                                     {{ $record->user->name ?? 'N/A' }}
                                     @if($record->user && $record->user->trashed())
-                                        <span class="badge badge-secondary p-1 ml-1" style="font-size: 0.6rem;">Đã nghỉ</span>
+                                        <span class="badge text-bg-secondary p-1 ms-1" style="font-size: 0.6rem;">Đã nghỉ</span>
                                     @endif
                                 </div>
                                 <small class="text-muted">{{ $record->user->employee_id ?? '' }}</small>
@@ -108,22 +109,22 @@
                         </div>
                     </td>
                     <td>
-                        <div class="font-weight-bold text-primary">
+                        <div class="fw-bold text-primary">
                             {{ $record->equipment->name ?? 'N/A' }}
                             @if($record->equipment && $record->equipment->trashed())
-                                <span class="badge badge-secondary p-1 ml-1" style="font-size: 0.6rem;">Đã hủy</span>
+                                <span class="badge text-bg-secondary p-1 ms-1" style="font-size: 0.6rem;">Đã hủy</span>
                             @endif
                         </div>
                         <small class="text-muted">{{ $record->equipment->model ?? '' }}</small>
                     </td>
                     <td>
-                        <div class="text-dark"><i class="far fa-calendar-alt mr-1 text-info"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('d/m/Y') }}</div>
+                        <div><i class="far fa-calendar-alt me-1 text-info"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('d/m/Y') }}</div>
                         @if($record->status == \App\Models\EquipmentUser::STATUS_RETURNED && $record->ngaytra)
-                            <div class="mt-1"><span class="badge badge-success px-2 py-1" style="font-size: 0.7rem;"><i class="fas fa-check-circle mr-1"></i>Trả: {{ \Carbon\Carbon::parse($record->ngaytra)->format('d/m/Y') }}</span></div>
+                            <div class="mt-1"><span class="badge text-bg-success px-2 py-1" style="font-size: 0.7rem;"><i class="fas fa-check-circle me-1"></i>Trả: {{ \Carbon\Carbon::parse($record->ngaytra)->format('d/m/Y') }}</span></div>
                         @elseif($record->hantra)
-                            <small class="text-danger font-weight-bold"><i class="fas fa-hourglass-half mr-1"></i>Hạn: {{ \Carbon\Carbon::parse($record->hantra)->format('d/m/Y') }}</small>
+                            <small class="text-danger fw-bold"><i class="fas fa-hourglass-half me-1"></i>Hạn: {{ \Carbon\Carbon::parse($record->hantra)->format('d/m/Y') }}</small>
                         @endif
-                        <div class="small text-muted"><i class="far fa-clock mr-1"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('H:i') }}</div>
+                        <div class="small text-muted"><i class="far fa-clock me-1"></i>{{ \Carbon\Carbon::parse($record->ngaymuon)->format('H:i') }}</div>
                     </td>
                     <td class="status-cell">
                         @php
@@ -150,56 +151,41 @@
                                 $icon = 'check-circle';
                             }
                         @endphp
-                        <span class="badge badge-{{ $badgeClass }} shadow-sm">
-                            <i class="fas fa-{{ $icon }} mr-1"></i>{{ $statusText }}
+                        <span class="badge text-bg-{{ $badgeClass }} shadow-sm">
+                            <i class="fas fa-{{ $icon }} me-1"></i>{{ $statusText }}
                         </span>
                         @if($status == \App\Models\EquipmentUser::STATUS_BORROWING && $record->hantra && $record->hantra < now())
                             <div class="mt-2 text-overdue">
-                                <span class="badge badge-danger animate__animated animate__pulse animate__infinite">
-                                    <i class="fas fa-exclamation-circle mr-1"></i>QUÁ HẠN
+                                <span class="badge text-bg-danger animate__animated animate__pulse animate__infinite">
+                                    <i class="fas fa-exclamation-circle me-1"></i>QUÁ HẠN
                                 </span>
                             </div>
                         @endif
                     </td>
-                    <td class="text-center action-cell">
+                    <td class="align-middle action-cell text-end pe-4">
                         <div class="btn-group">
                             @if($status == \App\Models\EquipmentUser::STATUS_PENDING)
-                                <form action="{{ route('equipment-users.approve', $record) }}" method="POST" class="d-inline">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn btn-success btn-xs mr-1" title="Duyệt">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                </form>
-                                <form action="{{ route('equipment-users.reject', $record) }}" method="POST" class="d-inline">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn btn-danger btn-xs mr-1" title="Từ chối">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </form>
+                                <button type="submit" form="approve-form-{{ $record->id }}" class="btn btn-success" title="Duyệt"><i class="fas fa-check"></i></button>
+                                <button type="submit" form="reject-form-{{ $record->id }}" class="btn btn-danger" title="Từ chối"><i class="fas fa-times"></i></button>
                             @endif
 
                             @if($status == \App\Models\EquipmentUser::STATUS_BORROWING)
-                                <form action="{{ route('equipment-users.return', $record) }}" method="POST" class="d-inline">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="btn btn-info btn-xs mr-1" title="Xác nhận trả">
-                                        <i class="fas fa-undo"></i>
-                                    </button>
-                                </form>
+                                <button type="submit" form="return-form-{{ $record->id }}" class="btn btn-info text-white" title="Xác nhận trả"><i class="fas fa-undo"></i></button>
                             @endif
 
-                            <a href="{{ route('equipment-users.show', $record) }}" class="btn btn-primary btn-xs mr-1" title="Chi tiết">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <a href="{{ route('equipment-users.edit', $record) }}" class="btn btn-warning btn-xs mr-1" title="Cập nhật">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <form action="{{ route('equipment-users.destroy', $record) }}" method="POST" class="d-inline">
-                                @csrf @method('DELETE')
-                                <button type="button" class="btn btn-danger btn-xs confirm-delete" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </form>
+                            <a href="{{ route('equipment-users.show', $record) }}" class="btn btn-primary" title="Chi tiết"><i class="fas fa-eye"></i></a>
+                            <a href="{{ route('equipment-users.edit', $record) }}" class="btn btn-warning" title="Cập nhật"><i class="fas fa-edit"></i></a>
+                            <button type="submit" form="delete-form-{{ $record->id }}" class="btn btn-danger" title="Xóa"><i class="fas fa-trash"></i></button>
                         </div>
+
+                        @if($status == \App\Models\EquipmentUser::STATUS_PENDING)
+                            <form id="approve-form-{{ $record->id }}" action="{{ route('equipment-users.approve', $record) }}" method="POST" class="d-none">@csrf @method('PATCH')</form>
+                            <form id="reject-form-{{ $record->id }}" action="{{ route('equipment-users.reject', $record) }}" method="POST" class="d-none">@csrf @method('PATCH')</form>
+                        @endif
+                        @if($status == \App\Models\EquipmentUser::STATUS_BORROWING)
+                            <form id="return-form-{{ $record->id }}" action="{{ route('equipment-users.return', $record) }}" method="POST" class="d-none">@csrf @method('PATCH')</form>
+                        @endif
+                        <form id="delete-form-{{ $record->id }}" action="{{ route('equipment-users.destroy', $record) }}" method="POST" class="d-none delete-form">@csrf @method('DELETE')</form>
                     </td>
                 </tr>
                 @empty
@@ -211,7 +197,8 @@
                 </tr>
                 @endforelse
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
     <div class="card-footer">
         <div class="d-flex justify-content-between align-items-center">
@@ -229,7 +216,7 @@
                 .notification((notification) => {
                     if (notification.type === 'App\\Notifications\\NewBorrowRequest') {
                         // Remove empty row if existence
-                        $('.empty-row').closest('tr').remove();
+                        $('.empty-row').btn-closest('tr').remove();
 
                         const tableBody = $('#borrow-requests-table tbody');
                         const showUrl = `{{ url('equipment-users') }}/${notification.record_id}`;
@@ -239,40 +226,40 @@
                         
                         const newRow = `
                             <tr id="record-row-${notification.record_id}" class="animate__animated animate__fadeInDown" style="background-color: #f0fdf4;">
-                                <td class="text-center text-muted font-weight-bold">${notification.record_id}</td>
+                                <td class="text-center text-muted fw-bold">${notification.record_id}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(notification.user_name)}&background=random" 
-                                             class="rounded-circle mr-2 border" style="width: 35px; height: 35px; object-fit: cover;">
+                                             class="rounded-circle me-2 border" style="width: 35px; height: 35px; object-fit: cover;">
                                         <div>
-                                            <div class="font-weight-bold text-dark">${notification.user_name}</div>
+                                            <div class="fw-bold text-dark">${notification.user_name}</div>
                                             <small class="text-muted">Mới gửi</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="font-weight-bold text-primary">${notification.equipment_name}</div>
+                                    <div class="fw-bold text-primary">${notification.equipment_name}</div>
                                 </td>
                                 <td>
-                                    <div class="text-dark"><i class="far fa-calendar-alt mr-1 text-info"></i>vừa xong</div>
+                                    <div class="text-dark"><i class="far fa-calendar-alt me-1 text-info"></i>vừa xong</div>
                                 </td>
                                 <td>
-                                    <span class="badge badge-info shadow-sm">
-                                        <i class="fas fa-clock mr-1"></i>Chờ duyệt
+                                    <span class="badge text-bg-info shadow-sm">
+                                        <i class="fas fa-clock me-1"></i>Chờ duyệt
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group">
                                         <form action="${approveUrl}" method="POST" class="d-inline">
                                             @csrf @method('PATCH')
-                                            <button type="submit" class="btn btn-success btn-xs mr-1" title="Duyệt"><i class="fas fa-check"></i></button>
+                                            <button type="submit" class="btn btn-success btn-xs me-1" title="Duyệt"><i class="fas fa-check"></i></button>
                                         </form>
                                         <form action="${rejectUrl}" method="POST" class="d-inline">
                                             @csrf @method('PATCH')
-                                            <button type="submit" class="btn btn-danger btn-xs mr-1" title="Từ chối"><i class="fas fa-times"></i></button>
+                                            <button type="submit" class="btn btn-danger btn-xs me-1" title="Từ chối"><i class="fas fa-times"></i></button>
                                         </form>
-                                        <a href="${showUrl}" class="btn btn-primary btn-xs mr-1" title="Chi tiết"><i class="fas fa-eye"></i></a>
-                                        <a href="${editUrl}" class="btn btn-warning btn-xs mr-1" title="Cập nhật"><i class="fas fa-edit"></i></a>
+                                        <a href="${showUrl}" class="btn btn-primary btn-xs me-1" title="Chi tiết"><i class="fas fa-eye"></i></a>
+                                        <a href="${editUrl}" class="btn btn-warning btn-xs me-1" title="Cập nhật"><i class="fas fa-edit"></i></a>
                                     </div>
                                 </td>
                             </tr>

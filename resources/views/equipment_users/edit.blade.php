@@ -47,7 +47,7 @@
                         @enderror
                     </div>
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="ngaymuon">Ngày Mượn</label>
@@ -101,9 +101,9 @@
 
                 <div class="card-footer">
                     <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-save mr-1"></i> Cập Nhật Phiếu
+                        <i class="fas fa-save me-1"></i> Cập Nhật Phiếu
                     </button>
-                    <a href="{{ route('equipment-users.index') }}" class="btn btn-default float-right">Hủy</a>
+                    <a href="{{ route('equipment-users.index') }}" class="btn btn-default float-end">Hủy</a>
                 </div>
             </form>
         </div>

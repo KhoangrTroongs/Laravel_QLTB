@@ -12,14 +12,14 @@
     <div class="col-md-10">
         <!-- Action Buttons -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0 text-muted font-weight-bold">
-                <i class="fas fa-history mr-2"></i>Dòng thời gian thông báo
+            <h5 class="mb-0 text-muted fw-bold">
+                <i class="fas fa-history me-2"></i>Dòng thời gian thông báo
             </h5>
             @if(auth()->user()->unreadNotifications->count() > 0)
                 <form action="{{ route('profile.notifications.markAllAsRead') }}" method="POST">
                     @csrf
                     <button type="submit" class="btn btn-primary btn-sm rounded-pill shadow-sm px-3">
-                        <i class="fas fa-check-double mr-1"></i> Đọc tất cả ({{ auth()->user()->unreadNotifications->count() }})
+                        <i class="fas fa-check-double me-1"></i> Đọc tất cả ({{ auth()->user()->unreadNotifications->count() }})
                     </button>
                 </form>
             @endif
@@ -40,7 +40,7 @@
 
                 @if($isNewDay)
                     <div class="time-label">
-                        <span class="bg-primary shadow-sm px-3">{{ $currentDate }}</span>
+                        <span class="text-bg-primary">{{ $currentDate }}</span>
                     </div>
                 @endif
 
@@ -62,14 +62,14 @@
                         }
                     @endphp
                     
-                    <i class="fas {{ $icon }} bg-{{ $color }} shadow-sm"></i>
+                    <i class="timeline-icon fas {{ $icon }} text-bg-{{ $color }}"></i>
                     
-                    <div class="timeline-item shadow-sm {{ $notification->read_at ? 'read-item' : 'unread-item' }}">
+                    <div class="timeline-item shadow-sm {{ $notification->read_at ? '' : 'border-start border-primary border-4' }}">
                         <span class="time text-muted">
-                            <i class="fas fa-clock mr-1"></i>{{ $notification->created_at->diffForHumans() }}
+                            <i class="fas fa-clock me-1"></i>{{ $notification->created_at->diffForHumans() }}
                         </span>
                         
-                        <h3 class="timeline-header border-0 {{ $notification->read_at ? 'text-muted' : 'font-weight-bold' }}">
+                        <h3 class="timeline-header border-0 {{ $notification->read_at ? 'text-secondary' : 'fw-bold' }}">
                             {{ $notification->data['title'] }}
                         </h3>
 
@@ -78,8 +78,8 @@
                         </div>
                         
                         <div class="timeline-footer pb-3 pt-1">
-                            <a href="{{ $notification->data['link'] ?? '#' }}" class="btn btn-sm btn-{{ $color }} rounded-pill px-3 shadow-sm mr-2">
-                                <i class="fas fa-eye mr-1"></i> Xem chi tiết
+                            <a href="{{ $notification->data['link'] ?? '#' }}" class="btn btn-sm btn-{{ $color }} rounded-pill px-3 shadow-sm me-2">
+                                <i class="fas fa-eye me-1"></i> Xem chi tiết
                             </a>
                             
                             @if(!$notification->read_at)
@@ -105,9 +105,11 @@
                 </div>
             @endforelse
             
+            @if($notifications->count() > 0)
             <div>
-                <i class="fas fa-clock bg-gray"></i>
+                <i class="timeline-icon fas fa-clock text-bg-secondary"></i>
             </div>
+            @endif
         </div>
 
         <div class="mt-4 d-flex justify-content-center">
@@ -116,18 +118,7 @@
     </div>
 </div>
 
-<style>
-    .timeline { margin-bottom: 50px; }
-    .timeline::before { border-radius: 0.25rem; background-color: #dee2e6; bottom: 0; content: ''; left: 31px; margin: 0; position: absolute; top: 0; width: 4px; }
-    .timeline-item { border-radius: 12px !important; margin-bottom: 25px !important; margin-left: 60px !important; border: 1px solid rgba(0,0,0,.08) !important; }
-    .unread-item { border-left: 4px solid #3b82f6 !important; background-color: #f8fafc !important; }
-    .read-item { opacity: 0.8; }
-    .timeline > div > i { left: 18px !important; width: 30px !important; height: 30px !important; font-size: 0.95rem !important; line-height: 30px !important; }
-    .timeline > .time-label > span { border-radius: 20px !important; padding: 5px 20px !important; font-size: 0.85rem !important; letter-spacing: 0.5px; }
-    .timeline-header { font-size: 1rem !important; padding: 1.25rem 1rem 0.5rem !important; }
-    .timeline-body { padding: 0.5rem 1rem !important; font-size: 0.95rem; color: #4b5563; }
-    .timeline-footer { padding: 0.5rem 1rem !important; }
-</style>
+
 @endsection
 
 @push('scripts')
@@ -150,16 +141,16 @@
                 
                 const newHtml = `
                     <div class="animate__animated animate__fadeInDown">
-                        <i class="fas ${icon} bg-${color} shadow-sm"></i>
-                        <div class="timeline-item shadow-sm unread-item" style="background-color: #f0fdf4 !important;">
-                            <span class="time text-primary font-weight-bold">
-                                <i class="fas fa-clock mr-1"></i>Vừa xong
+                        <i class="timeline-icon fas ${icon} text-bg-${color}"></i>
+                        <div class="timeline-item border-start border-primary border-4 bg-light">
+                            <span class="time text-primary fw-bold">
+                                <i class="fas fa-clock me-1"></i>Vừa xong
                             </span>
-                            <h3 class="timeline-header border-0 font-weight-bold">${notification.title}</h3>
+                            <h3 class="timeline-header border-0 fw-bold">${notification.title}</h3>
                             <div class="timeline-body py-2">${notification.message}</div>
                             <div class="timeline-footer pb-3 pt-1">
-                                <a href="${notification.link}" class="btn btn-sm btn-${color} rounded-pill px-3 shadow-sm mr-2">
-                                    <i class="fas fa-eye mr-1"></i> Xem chi tiết
+                                <a href="${notification.link}" class="btn btn-sm btn-${color} rounded-pill px-3 shadow-sm me-2">
+                                    <i class="fas fa-eye me-1"></i> Xem chi tiết
                                 </a>
                                 <button class="btn btn-sm btn-light border rounded-pill px-3" onclick="location.reload()">Đã rõ</button>
                             </div>
@@ -172,7 +163,7 @@
                 if (firstLabel.length > 0 && firstLabel.text().includes('{{ date("d/m/Y") }}')) {
                     firstLabel.after(newHtml);
                 } else {
-                    const todayLabel = `<div class="time-label"><span class="bg-primary shadow-sm px-3">{{ date("d/m/Y") }}</span></div>`;
+                    const todayLabel = `<div class="time-label"><span class="text-bg-primary">{{ date("d/m/Y") }}</span></div>`;
                     timeline.prepend($(todayLabel + newHtml));
                 }
             });

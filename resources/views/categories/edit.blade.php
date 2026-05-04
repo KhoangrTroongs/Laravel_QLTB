@@ -13,14 +13,14 @@
     <div class="col-md-7">
         <div class="card card-outline card-warning shadow-sm" style="border-radius: 12px;">
             <div class="card-header">
-                <h3 class="card-title font-weight-bold"><i class="fas fa-edit mr-2"></i>Cập nhật loại thiết bị</h3>
+                <h3 class="card-title fw-bold"><i class="fas fa-edit me-2"></i>Cập nhật loại thiết bị</h3>
             </div>
             <form action="{{ route('categories.update', $category) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="card-body">
                     <div class="form-group">
-                        <label class="small font-weight-bold text-muted text-uppercase">Tên loại <span class="text-danger">*</span></label>
+                        <label class="small fw-bold text-muted text-uppercase">Tên loại <span class="text-danger">*</span></label>
                         <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
                                value="{{ old('name', $category->name) }}" required autofocus>
                         @error('name')
@@ -29,7 +29,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="small font-weight-bold text-muted text-uppercase">Mô tả</label>
+                        <label class="small fw-bold text-muted text-uppercase">Mô tả</label>
                         <textarea name="description" class="form-control @error('description') is-invalid @enderror" 
                                   rows="2">{{ old('description', $category->description) }}</textarea>
                     </div>
@@ -38,11 +38,11 @@
 
                     <div class="form-group mt-4">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <label class="small font-weight-bold text-muted text-uppercase mb-0">
-                                <i class="fas fa-cog mr-1"></i> Định nghĩa thông số kỹ thuật (Specs)
+                            <label class="small fw-bold text-muted text-uppercase mb-0">
+                                <i class="fas fa-cog me-1"></i> Định nghĩa thông số kỹ thuật (Specs)
                             </label>
                             <button type="button" class="btn btn-xs btn-success rounded-pill px-3" id="add-spec">
-                                <i class="fas fa-plus mr-1"></i> Thêm thuộc tính
+                                <i class="fas fa-plus me-1"></i> Thêm thuộc tính
                             </button>
                         </div>
                         
@@ -72,11 +72,11 @@
                     </div>
                 </div>
                 <div class="card-footer bg-white border-top d-flex justify-content-end">
-                    <a href="{{ route('categories.index') }}" class="btn btn-default mr-2">
-                        <i class="fas fa-arrow-left mr-1"></i> Quay lại
+                    <a href="{{ route('categories.index') }}" class="btn btn-default me-2">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
                     </a>
-                    <button type="submit" class="btn btn-warning px-5 shadow-sm font-weight-bold">
-                        <i class="fas fa-save mr-1"></i> Cập nhật ngay
+                    <button type="submit" class="btn btn-warning px-5 shadow-sm fw-bold">
+                        <i class="fas fa-save me-1"></i> Cập nhật ngay
                     </button>
                 </div>
             </form>
@@ -103,7 +103,7 @@
         });
 
         $(document).on('click', '.remove-spec', function() {
-            $(this).closest('.spec-item').fadeOut(300, function() {
+            $(this).btn-closest('.spec-item').fadeOut(300, function() {
                 $(this).remove();
             });
         });

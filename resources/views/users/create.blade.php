@@ -9,11 +9,11 @@
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row g-3">
     <div class="col-md-8">
         <div class="card card-success card-outline">
             <div class="card-header">
-                <h3 class="card-title"><i class="fas fa-user-plus mr-2"></i>Form Thêm Nhân Viên</h3>
+                <h3 class="card-title"><i class="fas fa-user-plus me-2"></i>Form Thêm Nhân Viên</h3>
             </div>
             <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -41,46 +41,46 @@
                         </div>
                     @endif
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="employee_id" class="text-muted small font-weight-bold">MÃ NHÂN VIÊN <span class="text-danger">*</span></label>
+                                <label for="employee_id" class="text-muted small fw-bold">MÃ NHÂN VIÊN <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-id-card text-primary"></i></span></div>
-                                    <input type="text" name="employee_id" id="employee_id" class="form-control @error('employee_id') is-invalid @enderror border-left-0" value="{{ old('employee_id') }}" placeholder="VD: NV001">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-end-0"><i class="fas fa-id-card text-primary"></i></span></div>
+                                    <input type="text" name="employee_id" id="employee_id" class="form-control @error('employee_id') is-invalid @enderror border-start-0" value="{{ old('employee_id') }}" placeholder="VD: NV001">
                                 </div>
                                 @error('employee_id') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="name" class="text-muted small font-weight-bold">TÊN NHÂN VIÊN <span class="text-danger">*</span></label>
+                                <label for="name" class="text-muted small fw-bold">TÊN NHÂN VIÊN <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-user text-primary"></i></span></div>
-                                    <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror border-left-0" value="{{ old('name') }}" placeholder="Họ và tên đầy đủ">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-end-0"><i class="fas fa-user text-primary"></i></span></div>
+                                    <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror border-start-0" value="{{ old('name') }}" placeholder="Họ và tên đầy đủ">
                                 </div>
                                 @error('name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="email" class="text-muted small font-weight-bold">ĐỊA CHỈ EMAIL <span class="text-danger">*</span></label>
+                                <label for="email" class="text-muted small fw-bold">ĐỊA CHỈ EMAIL <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-envelope text-primary"></i></span></div>
-                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror border-left-0" value="{{ old('email') }}" placeholder="email@example.com">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-end-0"><i class="fas fa-envelope text-primary"></i></span></div>
+                                    <input type="email" name="email" id="email" class="form-control @error('email') is-invalid @enderror border-start-0" value="{{ old('email') }}" placeholder="email@example.com">
                                 </div>
                                 @error('email') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="phone" class="text-muted small font-weight-bold">SỐ ĐIỆN THOẠI</label>
+                                <label for="phone" class="text-muted small fw-bold">SỐ ĐIỆN THOẠI</label>
                                 <div class="input-group">
-                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-phone text-primary"></i></span></div>
-                                    <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror border-left-0" value="{{ old('phone') }}" placeholder="0900 000 000">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-end-0"><i class="fas fa-phone text-primary"></i></span></div>
+                                    <input type="text" name="phone" id="phone" class="form-control @error('phone') is-invalid @enderror border-start-0" value="{{ old('phone') }}" placeholder="0900 000 000">
                                 </div>
                                 @error('phone') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
@@ -88,28 +88,28 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="address" class="text-muted small font-weight-bold">ĐỊA CHỈ THƯỜNG TRÚ</label>
+                        <label for="address" class="text-muted small fw-bold">ĐỊA CHỈ THƯỜNG TRÚ</label>
                         <div class="input-group">
-                            <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-map-marker-alt text-primary"></i></span></div>
-                            <input type="text" name="address" id="address" class="form-control @error('address') is-invalid @enderror border-left-0" value="{{ old('address') }}" placeholder="Địa chỉ chi tiết">
+                            <div class="input-group-prepend"><span class="input-group-text bg-light border-end-0"><i class="fas fa-map-marker-alt text-primary"></i></span></div>
+                            <input type="text" name="address" id="address" class="form-control @error('address') is-invalid @enderror border-start-0" value="{{ old('address') }}" placeholder="Địa chỉ chi tiết">
                         </div>
                         @error('address') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                     </div>
 
-                    <div class="row">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="password" class="text-muted small font-weight-bold">MẬT KHẨU ĐĂNG NHẬP <span class="text-danger">*</span></label>
+                                <label for="password" class="text-muted small fw-bold">MẬT KHẨU ĐĂNG NHẬP <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-right-0"><i class="fas fa-lock text-primary"></i></span></div>
-                                    <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror border-left-0" placeholder="Tối thiểu 6 ký tự">
+                                    <div class="input-group-prepend"><span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-primary"></i></span></div>
+                                    <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror border-start-0" placeholder="Tối thiểu 6 ký tự">
                                 </div>
                                 @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="status" class="text-muted small font-weight-bold">TRẠNG THÁI CÔNG VIỆC <span class="text-danger">*</span></label>
+                                <label for="status" class="text-muted small fw-bold">TRẠNG THÁI CÔNG VIỆC <span class="text-danger">*</span></label>
                                 <select name="status" id="status" class="form-control @error('status') is-invalid @enderror">
                                     <option value="1" {{ old('status', '1') == '1' ? 'selected' : '' }}>Đang làm việc</option>
                                     <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Đã nghỉ việc</option>
@@ -121,10 +121,10 @@
                 </div>
                 <div class="card-footer">
                     <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save mr-1"></i>Lưu Nhân Viên
+                        <i class="fas fa-save me-1"></i>Lưu Nhân Viên
                     </button>
-                    <a href="{{ route('users.index') }}" class="btn btn-default ml-2">
-                        <i class="fas fa-arrow-left mr-1"></i>Quay Lại
+                    <a href="{{ route('users.index') }}" class="btn btn-default ms-2">
+                        <i class="fas fa-arrow-left me-1"></i>Quay Lại
                     </a>
                 </div>
             </form>

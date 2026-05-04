@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row g-3">
     <div class="col-md-4">
         <!-- Profile Image -->
         <div class="card card-primary card-outline shadow-sm bg-white" style="border-radius: 15px;">
@@ -26,17 +26,17 @@
                     @endif
                 </div>
 
-                <h3 class="profile-username text-center font-weight-bold text-dark mb-1">{{ $equipment->name }}</h3>
-                <p class="text-muted text-center text-uppercase small font-weight-bold mb-4">{{ $equipment->model }}</p>
+                <h3 class="profile-username text-center fw-bold text-dark mb-1">{{ $equipment->name }}</h3>
+                <p class="text-muted text-center text-uppercase small fw-bold mb-4">{{ $equipment->model }}</p>
 
                 <div class="d-flex justify-content-center gap-2 mb-4">
                     @if($equipment->status == 1)
-                        <span class="badge badge-success px-3 py-2 shadow-xs mr-2" style="border-radius: 8px;">
-                            <i class="fas fa-check-circle mr-1"></i> HOẠT ĐỘNG
+                        <span class="badge text-bg-success px-3 py-2 shadow-xs me-2" style="border-radius: 8px;">
+                            <i class="fas fa-check-circle me-1"></i> HOẠT ĐỘNG
                         </span>
                     @else
-                        <span class="badge badge-danger px-3 py-2 shadow-xs mr-2" style="border-radius: 8px;">
-                            <i class="fas fa-tools mr-1"></i> HỎNG/BẢO TRÌ
+                        <span class="badge text-bg-danger px-3 py-2 shadow-xs me-2" style="border-radius: 8px;">
+                            <i class="fas fa-tools me-1"></i> HỎNG/BẢO TRÌ
                         </span>
                     @endif
 
@@ -44,12 +44,12 @@
                         $isBorrowed = $equipment->users->where('pivot.status', \App\Models\EquipmentUser::STATUS_BORROWING)->count() > 0;
                     @endphp
                     @if($equipment->available == 1 && !$isBorrowed)
-                        <span class="badge badge-primary px-3 py-2 shadow-xs" style="border-radius: 8px;">
-                            <i class="fas fa-unlock mr-1"></i> SẴN SÀNG
+                        <span class="badge text-bg-primary px-3 py-2 shadow-xs" style="border-radius: 8px;">
+                            <i class="fas fa-unlock me-1"></i> SẴN SÀNG
                         </span>
                     @else
-                        <span class="badge badge-warning px-3 py-2 shadow-xs" style="border-radius: 8px;">
-                            <i class="fas fa-lock mr-1"></i> ĐANG BẬN
+                        <span class="badge text-bg-warning px-3 py-2 shadow-xs" style="border-radius: 8px;">
+                            <i class="fas fa-lock me-1"></i> ĐANG BẬN
                         </span>
                     @endif
                 </div>
@@ -58,17 +58,17 @@
 
                 <div class="px-2">
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted small font-weight-bold">LOẠI THIẾT BỊ:</span>
-                        <span class="text-primary font-weight-bold">{{ $equipment->category->name ?? 'N/A' }}</span>
+                        <span class="text-muted small fw-bold">LOẠI THIẾT BỊ:</span>
+                        <span class="text-primary fw-bold">{{ $equipment->category->name ?? 'N/A' }}</span>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted small font-weight-bold">PHIÊN BẢN/TAG:</span>
+                        <span class="text-muted small fw-bold">PHIÊN BẢN/TAG:</span>
                         <span class="text-dark">{{ $equipment->model }}</span>
                     </div>
                 </div>
 
-                <a href="{{ route('equipment.edit', $equipment) }}" class="btn btn-warning btn-block font-weight-bold mt-4 shadow-sm py-2">
-                    <i class="fas fa-edit mr-1"></i> CHỈNH SỬA THÔNG TIN
+                <a href="{{ route('equipment.edit', $equipment) }}" class="btn btn-warning btn-block fw-bold mt-4 shadow-sm py-2">
+                    <i class="fas fa-edit me-1"></i> CHỈNH SỬA THÔNG TIN
                 </a>
             </div>
         </div>
@@ -76,15 +76,15 @@
         <!-- Specs Box -->
         <div class="card card-outline card-info shadow-sm mt-4" style="border-radius: 12px;">
             <div class="card-header bg-white border-bottom-0">
-                <h3 class="card-title font-weight-bold text-info"><i class="fas fa-microchip mr-2"></i>Cấu hình chi tiết</h3>
+                <h3 class="card-title fw-bold text-info"><i class="fas fa-microchip me-2"></i>Cấu hình chi tiết</h3>
             </div>
             <div class="card-body pt-0">
                 @if($equipment->spec)
                     <div class="bg-light rounded p-3">
                         @foreach($equipment->spec as $key => $value)
                             <div class="mb-2 @if(!$loop->last) border-bottom pb-2 @endif">
-                                <span class="text-muted small text-uppercase font-weight-bold d-block">{{ $key }}</span>
-                                <span class="text-dark font-weight-600">{{ $value }}</span>
+                                <span class="text-muted small text-uppercase fw-bold d-block">{{ $key }}</span>
+                                <span class="text-dark fw-semibold">{{ $value }}</span>
                             </div>
                         @endforeach
                     </div>
@@ -105,8 +105,8 @@
     <div class="col-md-8">
         <div class="card card-outline card-primary shadow-sm h-100" style="border-radius: 15px;">
             <div class="card-header bg-white">
-                <h3 class="card-title font-weight-bold">
-                    <i class="fas fa-history mr-2 text-primary"></i>LỊCH SỬ MƯỢN THIẾT BỊ
+                <h3 class="card-title fw-bold">
+                    <i class="fas fa-history me-2 text-primary"></i>LỊCH SỬ MƯỢN THIẾT BỊ
                 </h3>
             </div>
             <div class="card-body bg-light rounded-bottom" style="max-height: 800px; overflow-y: auto;">
@@ -119,27 +119,27 @@
                             $status = $user->pivot->status;
                             
                             $iconClass = 'fas fa-envelope';
-                            $bgClass = 'bg-info';
+                            $bgClass = 'text-bg-info';
                             $statusLabel = 'Yêu cầu mới';
                             
                             if($status == 1) { // Borrowing
                                 $iconClass = 'fas fa-hand-holding-heart';
-                                $bgClass = 'bg-warning text-white';
+                                $bgClass = 'text-bg-warning';
                                 $statusLabel = 'Đang mượn';
                             } elseif($status == 2) { // Rejected
                                 $iconClass = 'fas fa-times-circle';
-                                $bgClass = 'bg-danger';
+                                $bgClass = 'text-bg-danger';
                                 $statusLabel = 'Đã từ chối';
                             } elseif($status == 3) { // Returned
                                 $iconClass = 'fas fa-check-circle';
-                                $bgClass = 'bg-success';
+                                $bgClass = 'text-bg-success';
                                 $statusLabel = 'Đã trả';
                             }
                         @endphp
 
                         @if($date !== $lastDate)
                             <div class="time-label">
-                                <span class="bg-primary px-3 shadow-xs" style="border-radius: 20px;">
+                                <span class="text-bg-primary px-3 shadow-xs" style="border-radius: 20px;">
                                     {{ $date }}
                                 </span>
                             </div>
@@ -147,34 +147,34 @@
                         @endif
 
                         <div>
-                            <i class="{{ $iconClass }} {{ $bgClass }} shadow-sm"></i>
-                            <div class="timeline-item shadow-xs mb-4 border-0" style="border-radius: 12px;">
-                                <span class="time text-muted"><i class="far fa-clock mr-1"></i>{{ \Carbon\Carbon::parse($user->pivot->created_at)->diffForHumans() }}</span>
-                                <h3 class="timeline-header border-bottom-0 py-3">
+                            <i class="timeline-icon {{ $iconClass }} {{ $bgClass }}"></i>
+                            <div class="timeline-item">
+                                <span class="time text-muted"><i class="far fa-clock me-1"></i>{{ \Carbon\Carbon::parse($user->pivot->created_at)->diffForHumans() }}</span>
+                                <h3 class="timeline-header">
                                     <div class="d-flex align-items-center">
                                         @if($user->avatar)
                                             <img src="{{ str_starts_with($user->avatar, 'http') ? $user->avatar : asset('storage/' . $user->avatar) }}" 
-                                                 class="rounded-circle mr-2 border shadow-xs" style="width: 35px; height: 35px; object-fit: cover;">
+                                                 class="rounded-circle me-2 border shadow-xs" style="width: 35px; height: 35px; object-fit: cover;">
                                         @else
                                             <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=3b82f6&color=fff" 
-                                                 class="rounded-circle mr-2 border shadow-xs" style="width: 35px; height: 35px;">
+                                                 class="rounded-circle me-2 border shadow-xs" style="width: 35px; height: 35px;">
                                         @endif
-                                        <div class="ml-2">
-                                            <a href="#" class="font-weight-bold text-dark">{{ $user->name }}</a>
+                                        <div class="ms-2">
+                                            <a href="#" class="fw-bold text-dark">{{ $user->name }}</a>
                                             <span class="mx-1 text-muted small">đã</span>
                                             <span class="badge {{ $bgClass }} px-2 py-1 small shadow-xs" style="border-radius: 6px;">{{ $statusLabel }}</span>
                                         </div>
                                     </div>
                                 </h3>
 
-                                <div class="timeline-body py-2 px-3 text-muted small bg-white mx-3 mb-2 rounded border shadow-xs">
+                                <div class="timeline-body">
                                     <p class="mb-1"><strong>Mã nhân viên:</strong> {{ $user->employee_id }}</p>
                                     @if($user->pivot->ngaytra)
-                                        <p class="mb-1 text-success font-weight-bold"><i class="fas fa-undo mr-1"></i>Đã hoàn trả ngày: {{ \Carbon\Carbon::parse($user->pivot->ngaytra)->format('d/m/Y H:i') }}</p>
+                                        <p class="mb-1 text-success fw-bold"><i class="fas fa-undo me-1"></i>Đã hoàn trả ngày: {{ \Carbon\Carbon::parse($user->pivot->ngaytra)->format('d/m/Y H:i') }}</p>
                                     @endif
                                     @if($user->pivot->description)
-                                        <p class="mb-0 mt-2 p-2 bg-light rounded text-italic border-left border-info" style="border-left-width: 4px !important;">
-                                            <i class="fas fa-comment-dots mr-2 opacity-50"></i>"{{ $user->pivot->description }}"
+                                        <p class="mb-0 mt-2 p-2 bg-light rounded text-italic border-start border-info" style="border-start-width: 4px !important;">
+                                            <i class="fas fa-comment-dots me-2 opacity-50"></i>"{{ $user->pivot->description }}"
                                         </p>
                                     @endif
                                 </div>
@@ -182,7 +182,7 @@
                         </div>
                     @endforeach
                     <div>
-                        <i class="fas fa-clock bg-gray shadow-sm"></i>
+                        <i class="timeline-icon fas fa-clock text-bg-secondary"></i>
                     </div>
                 </div>
                 @else

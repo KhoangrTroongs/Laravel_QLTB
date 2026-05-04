@@ -25,8 +25,8 @@
         
         <form action="{{ route('logout') }}" method="POST">
             @csrf
-            <button type="submit" class="btn btn-danger btn-block py-3 font-weight-bold" style="border-radius: 12px;">
-                <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất ngay
+            <button type="submit" class="btn btn-danger btn-block py-3 fw-bold" style="border-radius: 12px;">
+                <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất ngay
             </button>
         </form>
     </div>
